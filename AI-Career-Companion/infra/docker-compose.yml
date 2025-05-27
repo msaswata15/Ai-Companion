@@ -1,0 +1,29 @@
+version: "3.8"
+services:
+  app:
+    build: .
+    volumes:
+      - .:/app
+    ports:
+      - "8501:8501"
+    environment:
+      - GOOGLE_API_KEY=${GOOGLE_API_KEY}
+      - DATABASE_URL=postgres://postgres:postgres@db:5432/appdb
+      - REDIS_URL=redis://redis:6379
+    depends_on:
+      - db
+      - redis
+
+  db:
+    image: postgres:15
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: appdb
+    ports:
+      - "5432:5432"
+
+  redis:
+    image: redis:7
+    ports:
+      - "6379:6379"

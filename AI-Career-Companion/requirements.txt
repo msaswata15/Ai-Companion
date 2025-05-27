@@ -1,0 +1,9 @@
+streamlit
+google-generativeai
+pydantic
+pytest
+psycopg2-binary
+redis
+sqlalchemy
+pdfplumber
+python-docx
