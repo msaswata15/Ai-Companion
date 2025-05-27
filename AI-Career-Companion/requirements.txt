@@ -7,3 +7,5 @@ redis
 sqlalchemy
 pdfplumber
 python-docx
+python-dotenv
+pydantic-settings
