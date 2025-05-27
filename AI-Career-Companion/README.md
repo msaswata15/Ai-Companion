@@ -1,17 +1,6 @@
-# React + Vite
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
 
-Currently, two official plugins are available:
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Babel](https://babeljs.io/) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
-
-## Expanding the ESLint configuration
-
-If you are developing a production application, we recommend using TypeScript with type-aware lint rules enabled. Check out the [TS template](https://github.com/vitejs/vite/tree/main/packages/create-vite/template-react-ts) for information on how to integrate TypeScript and [`typescript-eslint`](https://typescript-eslint.io) in your project.
-
----
 
 # AI Career Companion
 
@@ -70,25 +59,3 @@ Open the provided local URL in your browser.
 
 ## License
 MIT
-
----
-
-## AI Career Companion
-
-A single web application that helps students:
-
-- **Generate** tailored resumes & cover letters from any job/scholarship posting
-- **Coach** them through live mock algorithmic interviews—with hints, code evaluation & feedback
-- **Build** personalized algorithm cheat-sheets on demand
-
-| **Criterion**                   | **Feature**                                                                                                                                           | **Why it Scores**                                                                                |
-| ------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------ |
-| Innovation & Creativity (25%)   | End-to-end “Career Companion” flow, unique UX tying resume → interview → cheat sheet                                                                  | It’s more than a bot—it’s a full funnel.                                                         |
-| Technical Complexity (25%)      | • GPT-4/OpenAI embeddings for JD parsing & answer grading<br>• Real-time code exec & sandboxing<br>• Dynamic cheat-sheet generation via prompt chains | Hard AI/ML plumbing + secure code evaluation + prompt orchestration.                             |
-| Functionality & Usability (20%) | • Intuitive React (JS) UI wizard<br>• Spring Boot/Node.js API layer<br>• SQL for user data & analytics                                                | A polished, end-to-end Web app that actually “works” with user accounts, persistence, analytics. |
-| Presentation & Demo (15%)       | • 3–5 min video flows through each module in sequence<br>• Live “generate” & “mock interview” demo                                                    | Clear narrative: “Here’s my cover letter → here’s me interviewing → here’s my cheat sheet.”      |
-| GitHub Tools & Workflows (15%)  | • Copilot-driven coding (docs & screenshots)<br>• CI/CD via GitHub Actions to deploy to Vercel/Heroku<br>• Automated tests & lint checks              | Demonstrate real-world DevOps maturity and Copilot productivity.                                 |
-
----
-
-Feel free to integrate this directly into your **README.md**, **slides.md**, or any presentation material. Let me know if you’d like additional sections—API overview, tech stack summary, or wiring up the demo video script next!
