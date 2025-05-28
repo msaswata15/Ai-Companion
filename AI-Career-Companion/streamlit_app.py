@@ -2,17 +2,16 @@ import os
 import streamlit as st
 from app.modules.generate_doc import generate_resume, generate_cover_letter
 from app.modules.mock_interview import run_mock_interview
-from app.modules.cheat_sheet import generate_cheat_sheet
+from app.modules.cheat_sheet import generate_cheat_sheet, extract_topics_from_text, generate_combined_cheat_sheet
 from app.modules.career_map import generate_career_map
 
 st.set_page_config(page_title="AI Career Companion", layout="wide", page_icon="💼")
 st.title("💼 AI Career Companion")
 
-# st.sidebar.image("app/assets/logo.png", use_container_width=True)  # use_column_width is deprecated
 st.sidebar.markdown("## 📂 Navigation")
 sidebar_choice = st.sidebar.radio(
     "Choose a Module",
-    ["📄 Generate Docs", "🧠 Mock Interview", "📚 Cheat Sheet", "🗺️ Career Map"]
+    ["📄 Generate Docs", "🧠 Mock Interview", "📚 Cheat Sheet", "🗸️ Career Map"]
 )
 
 if sidebar_choice == "📄 Generate Docs":
@@ -34,7 +33,6 @@ if sidebar_choice == "📄 Generate Docs":
     if generate_resume_clicked:
         with st.spinner("⏳ Generating your resume..."):
             resume = generate_resume(jd, resume_details)
-            # Display the resume in a more professional, indented format
             st.markdown("""
 <style>
 .resume-box {
@@ -72,7 +70,6 @@ if sidebar_choice == "📄 Generate Docs":
         cl = cl_response.text if hasattr(cl_response, 'text') else str(cl_response)
         st.text_area("📨 Generated Cover Letter", cl, height=300)
 
-        # Download button for cover letter
         from io import BytesIO
         import docx
         doc = docx.Document()
@@ -84,13 +81,12 @@ if sidebar_choice == "📄 Generate Docs":
         doc.save(buffer)
         buffer.seek(0)
         st.download_button(
-            label="📥 Download Cover Letter (DOCX)",
+            label="📅 Download Cover Letter (DOCX)",
             data=buffer,
             file_name="Cover_Letter.docx",
             mime="application/vnd.openxmlformats-officedocument.wordprocessingml.document"
         )
 
-    # Only show suggestions section if not generating cover letter
     if st.session_state.get('show_suggestions', False) and not generate_cover_letter_clicked:
         st.subheader("🔧 Upgrade Suggestions")
         with st.expander("⚙️ Advanced Options"):
@@ -150,7 +146,7 @@ if sidebar_choice == "📄 Generate Docs":
                 doc.save(buffer)
                 buffer.seek(0)
                 st.download_button(
-                    label="📥 Download DOCX Resume",
+                    label="📅 Download DOCX Resume",
                     data=buffer,
                     file_name="ATS_Optimized_Resume.docx",
                     mime="application/vnd.openxmlformats-officedocument.wordprocessingml.document"
@@ -175,18 +171,16 @@ elif sidebar_choice == "📚 Cheat Sheet":
         resume_details = extract_resume_details_from_pdf(uploaded_resume)
         extracted_text = resume_details.get('raw_text', '')
 
-    combined_text = f"{extracted_text}\n\n{jd_text}"
-
     if st.button("🚀 Generate Cheat Sheets"):
-        if not combined_text.strip():
+        if not extracted_text.strip() and not jd_text.strip():
             st.warning("⚠️ Please upload a resume and/or paste a job description.")
         else:
-            from app.modules.cheat_sheet import generate_combined_cheat_sheet, extract_topics_from_text
-            topics = extract_topics_from_text(combined_text)
+            combined_text = f"{extracted_text}\n\n{jd_text}"
+            topics = extract_topics_from_text(extracted_text, jd_text)
             st.success(f"🔍 Detected Topics: {', '.join(topics)}")
             with st.spinner("🛠️ Generating cheat sheets..."):
                 for topic in topics:
-                    sheet = generate_cheat_sheet(topic)
+                    sheet = generate_cheat_sheet(topic, jd_text)
                     with st.expander(f"📌 {topic}", expanded=False):
                         st.markdown(sheet, unsafe_allow_html=True)
 
@@ -194,14 +188,14 @@ elif sidebar_choice == "📚 Cheat Sheet":
     st.markdown("### ✍️ Generate by Custom Topic")
     custom_topic = st.text_input("Enter a specific algorithm topic (e.g., Binary Search Trees)")
     if st.button("📄 Generate Custom Cheat Sheet"):
-        sheet = generate_cheat_sheet(custom_topic)
+        sheet = generate_cheat_sheet(custom_topic, jd_text)
         with st.expander(f"📌 Cheat Sheet: {custom_topic}", expanded=True):
             st.markdown(sheet, unsafe_allow_html=True)
 
-elif sidebar_choice == "🗺️ Career Map":
-    st.header("🗺️ Career Path Explorer")
+elif sidebar_choice == "🗸️ Career Map":
+    st.header("🗸️ Career Path Explorer")
     profile = st.text_area("🧑‍🎓 Tell us about your interests & skills")
-    if st.button("🎯 Generate Career Map"):
+    if st.button("🌟 Generate Career Map"):
         with st.spinner("🧭 Mapping your career journey..."):
             roadmap = generate_career_map(profile)
             st.text_area("📌 Career Roadmap", roadmap, height=400)
