@@ -7,3 +7,7 @@ redis
 sqlalchemy
 pdfplumber
 python-docx
+streamlit-webrtc
+SpeechRecognition
+pyttsx3
+numpy
