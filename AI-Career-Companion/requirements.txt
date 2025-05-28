@@ -11,3 +11,5 @@ streamlit-webrtc
 SpeechRecognition
 pyttsx3
 numpy
+python-dotenv
+pydantic-settings

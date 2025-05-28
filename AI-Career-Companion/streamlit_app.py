@@ -111,10 +111,43 @@ elif sidebar_choice == "Mock Interview":
 
 elif sidebar_choice == "Cheat Sheet":
     st.header("Algorithm Cheat Sheet Generator")
-    topic = st.text_input("Algorithm Topic (e.g. Dynamic Programming)")
-    if st.button("Generate Cheat Sheet"):
-        sheet = generate_cheat_sheet(topic)
-        st.text_area("Cheat Sheet", sheet, height=400)
+    st.markdown("### 🧠 Option 1: Auto-generate from Resume + Job Description")
+    uploaded_resume = st.file_uploader("📄 Upload your resume (PDF)", type=["pdf"], key="cs_resume")
+    jd_text = st.text_area("📝 Paste Job Description", key="cs_jd")
+
+    extracted_text = ""
+    if uploaded_resume:
+        from app.modules.generate_doc.resume_parser import extract_resume_details_from_pdf
+        resume_details = extract_resume_details_from_pdf(uploaded_resume)
+        extracted_text = resume_details.get('raw_text', '')
+
+    combined_text = f"{extracted_text}\n\n{jd_text}"
+
+    if st.button("🚀 Generate Cheat Sheets from Resume + JD"):
+        if not combined_text.strip():
+            st.warning("Please upload a resume and/or paste a job description.")
+        else:
+            from app.modules.cheat_sheet import generate_combined_cheat_sheet, extract_topics_from_text
+            topics = extract_topics_from_text(combined_text)
+            st.success(f"🔍 Detected Topics: {', '.join(topics)}")
+
+            with st.spinner("Generating cheat sheets..."):
+                for topic in topics:
+                    from app.modules.cheat_sheet import generate_cheat_sheet
+                    sheet = generate_cheat_sheet(topic)
+                    with st.expander(f"📌 Cheat Sheet: {topic}", expanded=False):
+                        st.markdown(sheet, unsafe_allow_html=True)
+
+    st.markdown("---")
+    st.markdown("### ✍️ Option 2: Generate by Custom Topic")
+    custom_topic = st.text_input("Enter a specific algorithm topic (e.g., Binary Search Trees)")
+    if st.button("🧾 Generate Cheat Sheet by Topic"):
+        from app.modules.cheat_sheet import generate_cheat_sheet
+        sheet = generate_cheat_sheet(custom_topic)
+        with st.expander(f"📌 Cheat Sheet: {custom_topic}", expanded=True):
+            st.markdown(sheet, unsafe_allow_html=True)
+
+
 
 else:
     st.header("Career Path Explorer")
