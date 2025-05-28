@@ -32,7 +32,10 @@ def generate_cheat_sheet(topic: str) -> str:
 
     Tabular breakdown or tips (if applicable)
 
+    Some questions with answers that might be asked in an interview about this topic. 
+
     Format it using markdown-style headings and bullet points.
+
     """
     model = genai.GenerativeModel('models/gemini-1.5-flash-latest')
     response = model.generate_content(prompt)
