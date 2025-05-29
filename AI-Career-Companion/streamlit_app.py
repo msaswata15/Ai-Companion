@@ -4,7 +4,14 @@ from app.modules.generate_doc import generate_resume, generate_cover_letter
 from app.modules.cheat_sheet import generate_cheat_sheet, extract_topics_from_text, generate_combined_cheat_sheet
 from app.modules.career_map import generate_career_map
 from app.utils import fetch_jobs_remotive, fetch_jobs_adzuna, get_user_country
-
+from app.modules.voice_interview.webrtc_audio import (
+create_webrtc_recorder,
+process_recorded_audio,
+initialize_webrtc_session_state,
+)
+from app.modules.voice_interview import generate_feedback_from_audio
+from app.modules.voice_interview.record_audio import save_uploaded_audio
+initialize_webrtc_session_state()
 st.set_page_config(page_title="AI Career Companion", layout="wide", page_icon="💼")
 st.markdown("""
 <style>
@@ -474,52 +481,84 @@ elif st.session_state["nav_page"] == "interview":
             [q["question"] for q in st.session_state["questions"]],
         )
         st.session_state["selected_question"] = selected
-
+        
         if st.session_state.get("selected_question"):
             st.subheader("🎯 Selected Question")
             st.markdown(f"<div class='card'>{st.session_state['selected_question']}</div>", unsafe_allow_html=True)
+            st.subheader("🎙️ Record Your Answer")
+            webrtc_ctx = create_webrtc_recorder()
+            if webrtc_ctx.state.playing:
+                st.success("🔴 Recording... Speak your answer and click STOP to finish.")
+            elif st.session_state.is_recording and not webrtc_ctx.state.playing:
+                audio_path = process_recorded_audio()
+                if audio_path:
+                    st.session_state.audio_file_path = audio_path
 
-            st.subheader("📁 Upload your recorded answer (WebM or WAV)")
-            audio_file = st.file_uploader("Upload audio file", type=["webm", "wav","mp3"])
-
-            if audio_file is not None:
-                from app.modules.voice_interview.record_audio import save_uploaded_audio
-                ext = os.path.splitext(audio_file.name)[1]
-                audio_path = save_uploaded_audio(audio_file, extension=ext)
-
-                st.audio(audio_path, format=f"audio/{ext[1:]}")
-                st.success(f"✅ Audio uploaded and saved")
+            if st.session_state.recording_complete and st.session_state.audio_file_path:
+                st.markdown("### 🎵 Recorded Audio")
+                st.audio(st.session_state.audio_file_path, format="audio/wav")
 
                 if st.button("💡 Evaluate Answer", use_container_width=True):
                     with st.spinner("🔍 Analyzing your answer..."):
-                        from app.modules.voice_interview import generate_feedback_from_audio
-                        result = generate_feedback_from_audio(audio_path, st.session_state["selected_question"])
+                        result = generate_feedback_from_audio(
+                            st.session_state.audio_file_path,
+                            st.session_state["selected_question"]
+                        )
+                        st.session_state.transcript = result["transcript"]
+                        st.session_state.feedback = result["feedback"]
+                        st.session_state.evaluation_complete = True
+                        st.rerun()
 
-                        st.subheader("📝 Transcribed Answer:")
-                        st.markdown(f"<div class='card'>{result['transcript']}</div>", unsafe_allow_html=True)
+            # Uploaded Audio Option
+            st.subheader("📁 Or Upload Your Answer")
+            uploaded_audio = st.file_uploader("Upload your audio", type=["webm", "wav", "mp3"])
+            if uploaded_audio:
+                ext = os.path.splitext(uploaded_audio.name)[1]
+                audio_path = save_uploaded_audio(uploaded_audio, extension=ext)
+                st.audio(audio_path, format=f"audio/{ext[1:]}")
+                st.success("✅ Audio uploaded successfully.")
+                if st.button("💡 Evaluate Uploaded Answer"):
+                    result = generate_feedback_from_audio(audio_path, st.session_state["selected_question"])
+                    st.session_state.transcript = result["transcript"]
+                    st.session_state.feedback = result["feedback"]
+                    st.session_state.evaluation_complete = True
+                    st.rerun()
 
-                        st.subheader("📊 Evaluation Feedback:")
-                        st.markdown(f"<div class='card'>{result['feedback']}</div>", unsafe_allow_html=True)
+            # Show feedback if available
+            if st.session_state.get("evaluation_complete"):
+                st.markdown("---")
+                st.subheader("📝 Transcribed Answer:")
+                st.markdown(f"<div class='card'>{st.session_state.get('transcript', '')}</div>", unsafe_allow_html=True)
 
-    # --- Gemini Evaluation Section (moved from proctor_mode.py) ---
-    if (
-        hasattr(st.session_state, 'photos') and st.session_state.photos
-        and hasattr(st.session_state, 'proctor_code_input') and st.session_state.proctor_code_input.strip()
-    ):
-        st.header("🤖 AI Proctor Evaluation (Gemini)")
-        if st.button("Evaluate My Session with Gemini", key="proctor_gemini_eval"):
-            with st.spinner("Sending data to Gemini for evaluation..."):
-                from app.modules.voice_interview.transcribe import transcribe_image
-                last_photo = st.session_state.photos[-1][1]
-                face_eval = transcribe_image(last_photo)
-                from app.modules.voice_interview.evaluate import evaluate_answer
-                coding_question = "Write a Python function that returns the factorial of a given number."
-                code_eval = evaluate_answer(coding_question, st.session_state.proctor_code_input)
-                st.success("Gemini Evaluation Complete!")
-                st.markdown(f"**Face/Presence Evaluation:** {face_eval}")
-                st.markdown(f"**Code Evaluation:** {code_eval['raw']}")
+                st.subheader("📊 Evaluation Feedback:")
+                st.markdown(f"<div class='card'>{st.session_state.get('feedback', '')}</div>", unsafe_allow_html=True)
 
-# Cheat Sheet code
+                if st.button("🔄 Start Over", type="secondary"):
+                    for key in ['recording_complete', 'audio_file_path', 'transcript', 'feedback', 'evaluation_complete']:
+                        if key in st.session_state:
+                            del st.session_state[key]
+                    st.session_state.audio_processor.clear_frames()
+                    st.rerun()
+
+        # Proctor Evaluation (unchanged)
+        if (
+            hasattr(st.session_state, 'photos') and st.session_state.photos
+            and hasattr(st.session_state, 'proctor_code_input') and st.session_state.proctor_code_input.strip()
+        ):
+            st.header("🤖 AI Proctor Evaluation (Gemini)")
+            if st.button("Evaluate My Session with Gemini", key="proctor_gemini_eval"):
+                with st.spinner("Sending data to Gemini for evaluation..."):
+                    from app.modules.voice_interview.transcribe import transcribe_image
+                    from app.modules.voice_interview.evaluate import evaluate_answer
+                    last_photo = st.session_state.photos[-1][1]
+                    face_eval = transcribe_image(last_photo)
+                    coding_question = "Write a Python function that returns the factorial of a given number."
+                    code_eval = evaluate_answer(coding_question, st.session_state.proctor_code_input)
+                    st.success("Gemini Evaluation Complete!")
+                    st.markdown(f"**Face/Presence Evaluation:** {face_eval}")
+                    st.markdown(f"**Code Evaluation:** {code_eval['raw']}")
+                    
+    # Cheat Sheet code
 elif st.session_state["nav_page"] == "cheatsheet":
     st.header("📚 Algorithm Cheat Sheet Generator")
     
