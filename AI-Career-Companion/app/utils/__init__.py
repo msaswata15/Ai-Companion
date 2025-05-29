@@ -11,7 +11,7 @@ load_dotenv()
 class Settings(BaseSettings):
     model_config = SettingsConfigDict(env_file=".env", env_file_encoding="utf-8")
     google_api_key: str
-    assembly_api_key: str
+    assembly_api_key: str  # <-- must be lowercase with underscores
     database_url: str = "sqlite:///./app.db"    # fallback
     redis_url: str = "redis://localhost:6379"
 
