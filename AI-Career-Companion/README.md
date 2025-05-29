@@ -54,6 +54,9 @@ All features are seamlessly integrated for a professional, user-friendly experie
 - All uploads are session-shared for seamless experience
 - HTML tags are stripped from job descriptions for clean display
 
+  ![image](https://github.com/user-attachments/assets/096cfe8b-8ef6-4aff-a3f2-005c38131cea)
+
+
 ---
 
 ## Setup & Installation
