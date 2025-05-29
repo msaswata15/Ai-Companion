@@ -9,7 +9,7 @@ st.set_page_config(page_title="AI Career Companion", layout="wide", page_icon="�
 st.title("💼 AI Career Companion")
 
 st.sidebar.markdown("## 📂 Navigation")
-sidebar_options = ["📄 Generate Docs", "🧠 Mock Interview", "📚 Cheat Sheet", "🗸️ Career Map", "🤖 Automated Job Hunter"]
+sidebar_options = ["📄 Generate Docs", "🧠 Mock Interview", "📚 Cheat Sheet", "🤖 Automated Job Hunter"]
 sidebar_choice = st.sidebar.radio(
     "Choose a Module",
     sidebar_options
@@ -244,48 +244,6 @@ elif sidebar_choice == "📚 Cheat Sheet":
         sheet = generate_cheat_sheet(custom_topic, jd_text)
         with st.expander(f"📌 Cheat Sheet: {custom_topic}", expanded=True):
             st.markdown(sheet, unsafe_allow_html=True)
-
-# Career Map code
-elif sidebar_choice == "🗸️ Career Map":
-    st.header("🗸️ Career Path Explorer")
-    st.markdown("Upload your resume, paste a job description, or use data from the Resume Generator.")
-    uploaded_resume = st.file_uploader("📄 Upload your resume (PDF, optional)", type=["pdf"], key="career_resume_upload")
-
-    # Auto-import previous resume/JD if available and not already set
-    if 'career_resume' not in st.session_state or not st.session_state['career_resume']:
-        if st.session_state.get('improved_resume_text') or st.session_state.get('resume', ''):
-            st.session_state['career_resume'] = st.session_state.get('improved_resume_text') or st.session_state.get('resume', '')
-        else:
-            st.session_state['career_resume'] = ''
-    if 'career_jd' not in st.session_state or not st.session_state['career_jd']:
-        if st.session_state.get('jd', ''):
-            st.session_state['career_jd'] = st.session_state.get('jd', '')
-        else:
-            st.session_state['career_jd'] = ''
-
-    if uploaded_resume:
-        from app.modules.generate_doc.resume_parser import extract_resume_details_from_pdf
-        resume_details = extract_resume_details_from_pdf(uploaded_resume)
-        st.session_state['career_resume'] = resume_details.get('raw_text', '')
-
-    career_resume = st.text_area("📄 Paste Resume (optional)", value=st.session_state['career_resume'], key='career_resume_input', height=150)
-    career_jd = st.text_area("📋 Paste Job Description (optional)", value=st.session_state['career_jd'], key='career_jd_input', height=100)
-    profile = st.text_area("🧑‍🎓 Tell us about your interests & skills", height=100)
-
-    if st.button("🌟 Generate Career Map"):
-        context = ""
-        if career_resume.strip():
-            context += f"Resume:\n{career_resume}\n"
-        if career_jd.strip():
-            context += f"Job Description:\n{career_jd}\n"
-        if profile.strip():
-            context += f"Profile:\n{profile}\n"
-        if not context:
-            st.warning("Please provide at least one input: resume, job description, or profile.")
-        else:
-            with st.spinner("🧭 Mapping your career journey..."):
-                roadmap = generate_career_map(context)
-                st.text_area("📌 Career Roadmap", roadmap, height=400)
 
 # Automated Job Hunter code
 elif sidebar_choice == "🤖 Automated Job Hunter":
