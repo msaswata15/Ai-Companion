@@ -11,7 +11,9 @@ def clean_text(text: str) -> str:
 
 def generate_resume(job_description: str, resume_details: dict = None) -> str:
     """Use Gemini to transform JD and resume details into bullet-point resume."""
-    prompt = f"Generate a resume from: {job_description}"
+    # Remove HTML tags from job_description
+    job_description_clean = re.sub(r'<[^>]+>', '', job_description)
+    prompt = f"Generate a resume from: {job_description_clean}"
     if resume_details and 'raw_text' in resume_details:
         prompt += f"\n\nHere is my current resume:\n{resume_details['raw_text']}"
     model = genai.GenerativeModel('models/gemini-1.5-flash-latest')

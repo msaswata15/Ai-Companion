@@ -4,16 +4,19 @@ from app.modules.generate_doc import generate_resume, generate_cover_letter
 from app.modules.mock_interview import run_mock_interview
 from app.modules.cheat_sheet import generate_cheat_sheet, extract_topics_from_text, generate_combined_cheat_sheet
 from app.modules.career_map import generate_career_map
+from app.utils import fetch_jobs_remotive, fetch_jobs_adzuna, get_user_country
 
 st.set_page_config(page_title="AI Career Companion", layout="wide", page_icon="💼")
 st.title("💼 AI Career Companion")
 
 st.sidebar.markdown("## 📂 Navigation")
+sidebar_options = ["📄 Generate Docs", "🧠 Mock Interview", "📚 Cheat Sheet", "🗸️ Career Map", "🤖 Automated Job Hunter"]
 sidebar_choice = st.sidebar.radio(
     "Choose a Module",
-    ["📄 Generate Docs", "🧠 Mock Interview", "📚 Cheat Sheet", "🗸️ Career Map"]
+    sidebar_options
 )
 
+# Resume and Cover Letter generation code
 if sidebar_choice == "📄 Generate Docs":
     st.header("📄 Resume & Cover Letter Generator")
     uploaded_resume = st.file_uploader("📄 Upload your resume (PDF)", type=["pdf"])
@@ -152,6 +155,7 @@ if sidebar_choice == "📄 Generate Docs":
                     mime="application/vnd.openxmlformats-officedocument.wordprocessingml.document"
                 )
 
+# Mock Interview code
 elif sidebar_choice == "🧠 Mock Interview":
     st.header("🧠 Mock Algorithmic Interview")
     question = st.text_area("🧪 Describe your problem / paste code")
@@ -159,6 +163,7 @@ elif sidebar_choice == "🧠 Mock Interview":
         feedback = run_mock_interview(question)
         st.text_area("💬 Feedback & Hints", feedback, height=300)
 
+# Cheat Sheet code
 elif sidebar_choice == "📚 Cheat Sheet":
     st.header("📚 Algorithm Cheat Sheet Generator")
     st.markdown("### 🧠 Auto-generate from Resume + Job Description")
@@ -192,13 +197,121 @@ elif sidebar_choice == "📚 Cheat Sheet":
         with st.expander(f"📌 Cheat Sheet: {custom_topic}", expanded=True):
             st.markdown(sheet, unsafe_allow_html=True)
 
+# Career Map code
 elif sidebar_choice == "🗸️ Career Map":
     st.header("🗸️ Career Path Explorer")
-    profile = st.text_area("🧑‍🎓 Tell us about your interests & skills")
+    st.markdown("Upload your resume, paste a job description, or use data from the Resume Generator.")
+    uploaded_resume = st.file_uploader("📄 Upload your resume (PDF, optional)", type=["pdf"], key="career_resume_upload")
+
+    # Auto-import previous resume/JD if available and not already set
+    if 'career_resume' not in st.session_state or not st.session_state['career_resume']:
+        if st.session_state.get('improved_resume_text') or st.session_state.get('resume', ''):
+            st.session_state['career_resume'] = st.session_state.get('improved_resume_text') or st.session_state.get('resume', '')
+        else:
+            st.session_state['career_resume'] = ''
+    if 'career_jd' not in st.session_state or not st.session_state['career_jd']:
+        if st.session_state.get('jd', ''):
+            st.session_state['career_jd'] = st.session_state.get('jd', '')
+        else:
+            st.session_state['career_jd'] = ''
+
+    if uploaded_resume:
+        from app.modules.generate_doc.resume_parser import extract_resume_details_from_pdf
+        resume_details = extract_resume_details_from_pdf(uploaded_resume)
+        st.session_state['career_resume'] = resume_details.get('raw_text', '')
+
+    career_resume = st.text_area("📄 Paste Resume (optional)", value=st.session_state['career_resume'], key='career_resume_input', height=150)
+    career_jd = st.text_area("📋 Paste Job Description (optional)", value=st.session_state['career_jd'], key='career_jd_input', height=100)
+    profile = st.text_area("🧑‍🎓 Tell us about your interests & skills", height=100)
+
     if st.button("🌟 Generate Career Map"):
-        with st.spinner("🧭 Mapping your career journey..."):
-            roadmap = generate_career_map(profile)
-            st.text_area("📌 Career Roadmap", roadmap, height=400)
+        context = ""
+        if career_resume.strip():
+            context += f"Resume:\n{career_resume}\n"
+        if career_jd.strip():
+            context += f"Job Description:\n{career_jd}\n"
+        if profile.strip():
+            context += f"Profile:\n{profile}\n"
+        if not context:
+            st.warning("Please provide at least one input: resume, job description, or profile.")
+        else:
+            with st.spinner("🧭 Mapping your career journey..."):
+                roadmap = generate_career_map(context)
+                st.text_area("📌 Career Roadmap", roadmap, height=400)
+
+# Automated Job Hunter code
+elif sidebar_choice == "🤖 Automated Job Hunter":
+    st.header("🤖 Automated Job Hunter")
+    st.markdown("""
+    1. Upload or paste your resume (or use previous).
+    2. Paste job preferences/keywords (e.g. Data Scientist, Remote, Python).
+    3. Choose job source(s).
+    4. Click 'Find & Auto-Apply'.
+    5. See matched jobs, generated CV/cover letter, and application status.
+    """)
+    uploaded_resume = st.file_uploader("📄 Upload your resume (PDF, optional)", type=["pdf"], key="auto_resume_upload")
+    if 'auto_resume' not in st.session_state:
+        st.session_state['auto_resume'] = ''
+    if uploaded_resume:
+        from app.modules.generate_doc.resume_parser import extract_resume_details_from_pdf
+        resume_details = extract_resume_details_from_pdf(uploaded_resume)
+        st.session_state['auto_resume'] = resume_details.get('raw_text', '')
+    auto_resume = st.text_area("📄 Paste Resume (optional)", value=st.session_state['auto_resume'], key='auto_resume_input', height=150)
+    job_keywords = st.text_area("🔎 Job Preferences/Keywords", key='auto_job_keywords', height=80)
+    use_prev = st.button("Use Previous Resume", key='auto_use_prev')
+    if use_prev:
+        st.session_state['auto_resume'] = st.session_state.get('improved_resume_text') or st.session_state.get('resume', '')
+        auto_resume = st.session_state['auto_resume']
+    st.markdown("**Select job sources:**")
+    col1, col2 = st.columns(2)
+    with col1:
+        # Location input: if filled, disable Remotive
+        location = st.text_input("🌍 Location (city or leave blank for India)", value="")
+        use_remotive = st.checkbox("Remotive", value=True, key='use_remotive', disabled=bool(location.strip()))
+    with col2:
+        use_adzuna = st.checkbox("Adzuna", value=True, key='use_adzuna')
+    if st.button("Find & Auto-Apply"):
+        with st.spinner("🔍 Searching for jobs and preparing applications..."):
+            jobs = []
+            # If location is given, use Adzuna only and pass location, else use Remotive (India) and Adzuna (IN)
+            if not location.strip() and st.session_state.get('use_remotive'):
+                jobs += fetch_jobs_remotive(job_keywords, limit=10, location='India')
+            if st.session_state.get('use_adzuna'):
+                adzuna_loc = location.strip() if location.strip() else 'IN'
+                jobs += fetch_jobs_adzuna(job_keywords, location=adzuna_loc, limit=10)
+            if not jobs:
+                st.warning("No jobs found. Try different keywords or sources.")
+            else:
+                st.success(f"Found {len(jobs)} jobs matching your criteria.")
+                from app.modules.generate_doc import genai
+                model = genai.GenerativeModel('models/gemini-1.5-flash-latest')
+                import re
+                for i, job in enumerate(jobs, 1):
+                    job_desc_clean = re.sub(r'<[^>]+>', '', job['desc'])
+                    st.markdown(f"**{i}. [{job['title']}]({job['url']}) at {job['company']} ({job['location']})**\n\n{job_desc_clean[:300]}...")
+                    # --- Suggest improvements for this job ---
+                    suggest_prompt = f"Given the following resume and job description, suggest improvements.\n\nResume:\n{auto_resume}\n\nJob Description:\n{job_desc_clean}"
+                    suggest_prompt += "\n\nSuggest 2-3 impactful projects to add or upgrade."
+                    suggest_prompt += "\n\nSuggest 2-3 in-demand skills to learn or improve."
+                    suggest_prompt += "\n\nIf any important certifications are missing, recommend them as well."
+                    suggestions_resp = model.generate_content(suggest_prompt)
+                    suggestions = suggestions_resp.text if hasattr(suggestions_resp, 'text') else str(suggestions_resp)
+                    # --- Apply suggestions to resume ---
+                    apply_prompt = f"Rewrite my resume for this job: {job_desc_clean}\n\nCurrent resume:\n{auto_resume}\n\nApply these suggestions: {suggestions}\n\nNote: Add suggested projects, skills, and certifications."
+                    improved_resume_resp = model.generate_content(apply_prompt)
+                    improved_resume_text = improved_resume_resp.text if hasattr(improved_resume_resp, 'text') else str(improved_resume_resp)
+                    # --- Clean up resume text ---
+                    clean_text = re.sub(r'[★*•●▪️-]+', '', improved_resume_text)
+                    clean_text = re.sub(r'\n+', '\n', clean_text)
+                    st.markdown("**Tailored Resume:**")
+                    st.text_area(f"Resume for {job['title']}", clean_text, height=120)
+                    # --- Generate tailored cover letter ---
+                    cover_letter_prompt = f"Write a professional cover letter for the following job description using this resume.\n\nJob Description:\n{job_desc_clean}\n\nResume:\n{clean_text}"
+                    cl_response = model.generate_content(cover_letter_prompt)
+                    cl = cl_response.text if hasattr(cl_response, 'text') else str(cl_response)
+                    st.markdown("**Tailored Cover Letter:**")
+                    st.text_area(f"Cover Letter for {job['title']}", cl, height=120)
+                    st.success("[Demo] Application submitted! (Click job title to view/apply manually)")
 
 st.markdown("---")
 st.markdown("<center><small>🚀 Built with ❤️ using Streamlit | AI Career Companion</small></center>", unsafe_allow_html=True)
