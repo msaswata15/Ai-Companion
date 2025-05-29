@@ -1,3 +1,5 @@
+from dotenv import load_dotenv
+load_dotenv()
 import os
 import redis
 import sqlalchemy
@@ -6,8 +8,7 @@ import google.generativeai as genai
 # ——— Pydantic Settings import from pydantic-settings ———
 
 from pydantic_settings import BaseSettings, SettingsConfigDict
-from dotenv import load_dotenv
-load_dotenv()
+
 class Settings(BaseSettings):
     model_config = SettingsConfigDict(env_file=".env", env_file_encoding="utf-8")
     google_api_key: str
