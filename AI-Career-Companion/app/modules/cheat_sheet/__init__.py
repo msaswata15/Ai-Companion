@@ -57,8 +57,7 @@ def generate_combined_cheat_sheet(resume_text: str, job_description: str = None)
     all_sheets = ""
 
     for topic in topics:
-        all_sheets += f"# Cheat Sheet: {topic}\n\n"
-        all_sheets += generate_cheat_sheet(topic, combined_text)
-        all_sheets += "\n\n---\n\n"
-
-    return all_sheets
+        combined += f"# Cheat Sheet: {topic}\n\n"
+        combined += generate_cheat_sheet(topic)
+        combined += "\n\n---\n\n"
+    return combined

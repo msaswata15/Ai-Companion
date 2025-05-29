@@ -157,6 +157,63 @@ if sidebar_choice == "📄 Generate Docs":
 
 # Mock Interview code
 elif sidebar_choice == "🧠 Mock Interview":
+    st.title("🎤 Voice-Based Mock Interview")
+    st.markdown("### Step 1: Upload Resume and JD")
+    # Resume Upload
+    uploaded_resume = st.file_uploader("📄 Upload Resume (PDF)", type=["pdf"], key="mock_resume")
+    jd_text = st.text_area("📌 Paste Job Description", key="mock_jd")
+    resume_text = ""
+    if uploaded_resume:
+        from app.modules.generate_doc.resume_parser import extract_resume_details_from_pdf
+        parsed = extract_resume_details_from_pdf(uploaded_resume)
+        resume_text = parsed.get("raw_text", "")
+
+    if st.button("🧠 Generate Questions from Resume + JD") and (jd_text or resume_text):
+        from app.modules.voice_interview import get_questions_from_resume_and_jd
+        question_list = get_questions_from_resume_and_jd(resume_text, jd_text)
+        st.session_state["questions"] = question_list
+        st.success("✅ Questions generated successfully!")
+
+    if "questions" in st.session_state:
+        selected = st.selectbox(
+            "📋 Choose a question to answer:",
+            [q["question"] for q in st.session_state["questions"]],
+        )
+        st.session_state["selected_question"] = selected
+
+    if st.session_state.get("selected_question"):
+        st.markdown("### 🎯 Selected Question")
+        st.info(st.session_state["selected_question"])
+
+        st.markdown("### 📁 Upload your recorded answer (WebM or WAV)")
+
+        # Upload audio file
+        audio_file = st.file_uploader("Upload audio file", type=["webm", "wav","mp3"])
+
+        if audio_file is not None:
+            from app.modules.voice_interview.record_audio import save_uploaded_audio
+            ext = os.path.splitext(audio_file.name)[1]
+            audio_path = save_uploaded_audio(audio_file, extension=ext)
+
+            # Play back audio
+            st.audio(audio_path, format=f"audio/{ext[1:]}")
+            st.success(f"✅ Audio uploaded and saved to: {audio_path}")
+
+            # Evaluate button
+            if st.button("💡 Evaluate Answer"):
+                from app.modules.voice_interview import generate_feedback_from_audio
+                result = generate_feedback_from_audio(audio_path, st.session_state["selected_question"])
+
+                st.subheader("📝 Transcribed Answer:")
+                st.text_area("Transcript", result["transcript"], height=200)
+
+                st.subheader("📊 Gemini Evaluation:")
+                st.markdown(result["feedback"], unsafe_allow_html=True)
+
+
+elif sidebar_choice == "📚 Cheat Sheet":
+    st.header("📚 Algorithm Cheat Sheet Generator")
+    st.markdown("### 🧠 Auto-generate from Resume + Job Description")
     st.header("🧠 Mock Algorithmic Interview")
     question = st.text_area("🧪 Describe your problem / paste code")
     if st.button("🎤 Start Interview"):
@@ -197,6 +254,13 @@ elif sidebar_choice == "📚 Cheat Sheet":
         with st.expander(f"📌 Cheat Sheet: {custom_topic}", expanded=True):
             st.markdown(sheet, unsafe_allow_html=True)
 
+elif sidebar_choice == "🗸️ Career Map":
+    st.header("🗸️ Career Path Explorer")
+    profile = st.text_area("🧑‍🎓 Tell us about your interests & skills")
+    if st.button("🌟 Generate Career Map"):
+        with st.spinner("🧭 Mapping your career journey..."):
+            roadmap = generate_career_map(profile)
+            st.text_area("📌 Career Roadmap", roadmap, height=400)
 # Career Map code
 elif sidebar_choice == "🗸️ Career Map":
     st.header("🗸️ Career Path Explorer")
