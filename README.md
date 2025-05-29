@@ -1,61 +1,103 @@
-
-
-
-
 # AI Career Companion
 
-AI Career Companion is a Streamlit-based application that helps users generate ATS-optimized resumes and cover letters, receive project and skill upgrade suggestions, and explore career paths using Google Gemini AI.
+## Overview
+AI Career Companion is a modern, all-in-one Streamlit application designed to help job seekers accelerate their job search and application process using AI. The app provides:
+- Automated job hunting and matching
+- Tailored resume and cover letter generation
+- Cheat sheet creation for technical interviews
+- Voice-based mock interview practice
+
+All features are seamlessly integrated for a professional, user-friendly experience.
+
+---
 
 ## Features
-- **Resume & Cover Letter Generator:**
-  - Upload your resume (PDF) and extract details automatically.
-  - Generate a new resume tailored to a job description using Gemini AI.
-  - Get AI-powered suggestions to upgrade your projects, skills, and certifications.
-  - Apply suggestions and download a clean, ATS-friendly DOCX resume.
-  - Generate a professional cover letter based on your improved resume and job description.
-- **Mock Interview:**
-  - Get feedback and hints on your coding or algorithmic questions.
-- **Cheat Sheet Generator:**
-  - Instantly generate algorithm cheat sheets for any topic.
-- **Career Path Explorer:**
-  - Get a personalized career roadmap based on your interests and skills.
 
-## Installation
-1. Clone the repository:
+### 🏠 Home (Full Workflow)
+- Upload your resume (PDF) and a job description (JD)
+- One-click: "Run Full AI Career Workflow" runs all modules in sequence:
+  1. **Automated Job Hunter**: Finds relevant jobs and displays matches
+  2. **Tailored Resume**: Generates a resume optimized for the job
+  3. **Cover Letter**: Creates a custom cover letter
+  4. **Cheat Sheet**: Auto-generates a study guide of key topics
+  5. **Mock Interview**: Prepares you with AI-generated interview questions
+- Resume and JD uploads are shared across all features
+
+### 🤖 Automated Job Hunter
+- Find jobs by keywords, location, and source (Remotive, Adzuna)
+- See job matches, tailored resume, and cover letter for each job
+- Application status feedback (demo)
+
+### 📄 Resume/Cover Letter
+- Upload resume and JD, or use shared uploads from Home
+- Generate a tailored resume and cover letter
+- Download results as DOCX
+- Get AI-powered suggestions for projects, skills, and certifications
+
+### 📚 Cheat Sheet Generator
+- Auto-detects topics from your resume and JD
+- Generates concise cheat sheets for each topic
+- Option to generate by custom topic
+
+### 🎤 Mock Interview
+- Upload resume and JD, or use shared uploads
+- Get AI-generated interview questions
+- Upload and evaluate your recorded answers (WebM/WAV/MP3)
+- Receive feedback and transcript
+
+---
+
+## UI/UX Highlights
+- Modern, modular Streamlit UI with custom CSS
+- Sidebar navigation with clear highlighting
+- Always-visible, context-aware workflow button on Home
+- All uploads are session-shared for seamless experience
+- HTML tags are stripped from job descriptions for clean display
+
+  ![image](https://github.com/user-attachments/assets/096cfe8b-8ef6-4aff-a3f2-005c38131cea)
+
+  ![image](https://github.com/user-attachments/assets/87fa11bf-cc5d-4267-b124-9f29eeb8d0a5)
+
+---
+
+## Setup & Installation
+
+1. **Clone the repository:**
    ```sh
    git clone <repo-url>
    cd AI-Career-Companion
    ```
-2. Install dependencies:
+2. **Install dependencies:**
    ```sh
    pip install -r requirements.txt
    ```
-3. Add your Google API key and other settings to a `.env` file:
-   ```env
-   GOOGLE_API_KEY=your_google_api_key
-   DATABASE_URL=sqlite:///./app.db
-   REDIS_URL=redis://localhost:6379
+3. **Run the app:**
+   ```sh
+   streamlit run streamlit_app.py
    ```
 
-## Usage
-Run the Streamlit app:
-```sh
-streamlit run streamlit_app.py
-```
-Open the provided local URL in your browser.
+---
 
-## Notes
-- For resume PDF parsing, only text-based PDFs are supported (not scanned images).
-- The app uses Google Gemini (Generative AI) for all AI-powered features.
-- All generated resumes are formatted for high ATS scores (no stars, bullets, or non-ATS-friendly symbols).
+## Folder Structure
+- `streamlit_app.py` — Main Streamlit app
+- `app/modules/` — Modular feature logic (resume, job hunter, interview, cheat sheet, etc.)
+- `app/utils/` — Utility functions (job fetching, etc.)
+- `requirements.txt` — Python dependencies
+- `README.md` — Project documentation
 
-## Project Structure
-- `streamlit_app.py` - Main Streamlit app
-- `app/modules/generate_doc/` - Resume, cover letter, and parsing logic
-- `app/modules/mock_interview/` - Mock interview logic
-- `app/modules/cheat_sheet/` - Cheat sheet generator
-- `app/modules/career_map/` - Career path explorer
-- `app/utils/` - Settings and utility functions
+---
 
 ## License
-MIT
+This project is licensed under the MIT License.
+
+---
+
+## Acknowledgements
+- Built with [Streamlit](https://streamlit.io/)
+- Uses Google Gemini API for AI content generation
+- Job data from Remotive and Adzuna APIs
+
+---
+
+## Contact
+For questions or contributions, please open an issue or pull request on GitHub.
