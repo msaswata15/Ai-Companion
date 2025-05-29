@@ -116,3 +116,6 @@ node_modules/
 # Ignore test cache
 /tests/__pycache__/
 /app/**/__pycache__/
+
+# Proctoring session data
+proctor_session_data/

@@ -441,13 +441,13 @@ elif st.session_state["nav_page"] == "resume":
 # Mock Interview code
 elif st.session_state["nav_page"] == "interview":
     st.title("🎤 Voice-Based Mock Interview")
+    # Step 1: Upload Resume and JD
     with st.expander("📁 Step 1: Upload Resume and JD", expanded=True):
         col1, col2 = st.columns(2)
         with col1:
             uploaded_resume = st.file_uploader("📄 Upload Resume (PDF)", type=["pdf"], key="mock_resume")
         with col2:
             jd_text = st.text_area("📌 Paste Job Description", key="mock_jd", height=150)
-    
     resume_text = ""
     if uploaded_resume:
         from app.modules.generate_doc.resume_parser import extract_resume_details_from_pdf
@@ -456,6 +456,7 @@ elif st.session_state["nav_page"] == "interview":
         with st.expander("📝 Extracted Resume Text"):
             st.text_area("Resume Text", resume_text, height=200, label_visibility="collapsed")
 
+    # Step 2: Generate Questions
     if st.button("🧠 Generate Questions from Resume + JD", use_container_width=True) and (jd_text or resume_text):
         with st.spinner("🔍 Generating interview questions..."):
             from app.modules.voice_interview import get_questions_from_resume_and_jd
@@ -463,38 +464,60 @@ elif st.session_state["nav_page"] == "interview":
             st.session_state["questions"] = question_list
             st.success("✅ Questions generated successfully!")
 
+    # Step 3: Proctor Mode and Questions (only after questions are generated)
     if "questions" in st.session_state:
+        from app.modules.mock_interview.proctor_mode import proctor_mode_ui
+        proctor_mode_ui()
+        st.markdown("---")
         selected = st.selectbox(
             "📋 Choose a question to answer:",
             [q["question"] for q in st.session_state["questions"]],
         )
         st.session_state["selected_question"] = selected
 
-    if st.session_state.get("selected_question"):
-        st.subheader("🎯 Selected Question")
-        st.markdown(f"<div class='card'>{st.session_state['selected_question']}</div>", unsafe_allow_html=True)
+        if st.session_state.get("selected_question"):
+            st.subheader("🎯 Selected Question")
+            st.markdown(f"<div class='card'>{st.session_state['selected_question']}</div>", unsafe_allow_html=True)
 
-        st.subheader("📁 Upload your recorded answer (WebM or WAV)")
-        audio_file = st.file_uploader("Upload audio file", type=["webm", "wav","mp3"])
+            st.subheader("📁 Upload your recorded answer (WebM or WAV)")
+            audio_file = st.file_uploader("Upload audio file", type=["webm", "wav","mp3"])
 
-        if audio_file is not None:
-            from app.modules.voice_interview.record_audio import save_uploaded_audio
-            ext = os.path.splitext(audio_file.name)[1]
-            audio_path = save_uploaded_audio(audio_file, extension=ext)
+            if audio_file is not None:
+                from app.modules.voice_interview.record_audio import save_uploaded_audio
+                ext = os.path.splitext(audio_file.name)[1]
+                audio_path = save_uploaded_audio(audio_file, extension=ext)
 
-            st.audio(audio_path, format=f"audio/{ext[1:]}")
-            st.success(f"✅ Audio uploaded and saved")
+                st.audio(audio_path, format=f"audio/{ext[1:]}")
+                st.success(f"✅ Audio uploaded and saved")
 
-            if st.button("💡 Evaluate Answer", use_container_width=True):
-                with st.spinner("🔍 Analyzing your answer..."):
-                    from app.modules.voice_interview import generate_feedback_from_audio
-                    result = generate_feedback_from_audio(audio_path, st.session_state["selected_question"])
+                if st.button("💡 Evaluate Answer", use_container_width=True):
+                    with st.spinner("🔍 Analyzing your answer..."):
+                        from app.modules.voice_interview import generate_feedback_from_audio
+                        result = generate_feedback_from_audio(audio_path, st.session_state["selected_question"])
 
-                    st.subheader("📝 Transcribed Answer:")
-                    st.markdown(f"<div class='card'>{result['transcript']}</div>", unsafe_allow_html=True)
+                        st.subheader("📝 Transcribed Answer:")
+                        st.markdown(f"<div class='card'>{result['transcript']}</div>", unsafe_allow_html=True)
 
-                    st.subheader("📊 Evaluation Feedback:")
-                    st.markdown(f"<div class='card'>{result['feedback']}</div>", unsafe_allow_html=True)
+                        st.subheader("📊 Evaluation Feedback:")
+                        st.markdown(f"<div class='card'>{result['feedback']}</div>", unsafe_allow_html=True)
+
+    # --- Gemini Evaluation Section (moved from proctor_mode.py) ---
+    if (
+        hasattr(st.session_state, 'photos') and st.session_state.photos
+        and hasattr(st.session_state, 'proctor_code_input') and st.session_state.proctor_code_input.strip()
+    ):
+        st.header("🤖 AI Proctor Evaluation (Gemini)")
+        if st.button("Evaluate My Session with Gemini", key="proctor_gemini_eval"):
+            with st.spinner("Sending data to Gemini for evaluation..."):
+                from app.modules.voice_interview.transcribe import transcribe_image
+                last_photo = st.session_state.photos[-1][1]
+                face_eval = transcribe_image(last_photo)
+                from app.modules.voice_interview.evaluate import evaluate_answer
+                coding_question = "Write a Python function that returns the factorial of a given number."
+                code_eval = evaluate_answer(coding_question, st.session_state.proctor_code_input)
+                st.success("Gemini Evaluation Complete!")
+                st.markdown(f"**Face/Presence Evaluation:** {face_eval}")
+                st.markdown(f"**Code Evaluation:** {code_eval['raw']}")
 
 # Cheat Sheet code
 elif st.session_state["nav_page"] == "cheatsheet":
