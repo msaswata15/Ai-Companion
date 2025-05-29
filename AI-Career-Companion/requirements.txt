@@ -13,3 +13,6 @@ pyttsx3
 numpy
 python-dotenv
 pydantic-settings
+requests
+streamlit-javascript
+ffmpeg-python

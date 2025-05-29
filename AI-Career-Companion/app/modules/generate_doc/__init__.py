@@ -26,5 +26,4 @@ def generate_cover_letter(job_description: str, resume_details: dict = None) -> 
         prompt += f"\n\nHere is my current resume:\n{resume_details['raw_text']}"
     model = genai.GenerativeModel('models/gemini-1.5-flash-latest')
     response = model.generate_content(prompt)
-    output = response.text if hasattr(response, 'text') else str(response)
-    return clean_text(output)
+    return response.text if hasattr(response, 'text') else str(response)
