@@ -112,7 +112,7 @@ node_modules/
 # Ignore data and output folders
 /data/
 /output/
-
+./temp_audio
 # Ignore test cache
 /tests/__pycache__/
 /app/**/__pycache__/
