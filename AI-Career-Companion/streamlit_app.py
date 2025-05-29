@@ -9,10 +9,11 @@ st.set_page_config(page_title="AI Career Companion", layout="wide", page_icon="�
 st.title("💼 AI Career Companion")
 
 st.sidebar.markdown("## 📂 Navigation")
-sidebar_options = ["📄 Generate Docs", "🧠 Mock Interview", "📚 Cheat Sheet", "🤖 Automated Job Hunter"]
+sidebar_options = ["🤖 Automated Job Hunter", "📄 Generate Docs", "🧠 Mock Interview", "📚 Cheat Sheet"]
 sidebar_choice = st.sidebar.radio(
     "Choose a Module",
-    sidebar_options
+    sidebar_options,
+    index=0  # Default to Automated Job Hunter
 )
 
 # Resume and Cover Letter generation code
