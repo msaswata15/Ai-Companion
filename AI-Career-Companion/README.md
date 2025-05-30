@@ -5,7 +5,7 @@ AI Career Companion is a modern, all-in-one Streamlit application designed to he
 - Automated job hunting and matching
 - Tailored resume and cover letter generation
 - Cheat sheet creation for technical interviews
-- Voice-based mock interview practice
+- Voice-based mock interview practice (with proctoring)
 
 All features are seamlessly integrated for a professional, user-friendly experience.
 
@@ -20,7 +20,7 @@ All features are seamlessly integrated for a professional, user-friendly experie
   2. **Tailored Resume**: Generates a resume optimized for the job
   3. **Cover Letter**: Creates a custom cover letter
   4. **Cheat Sheet**: Auto-generates a study guide of key topics
-  5. **Mock Interview**: Prepares you with AI-generated interview questions
+  5. **Mock Interview**: Prepares you with AI-generated interview questions (viva only)
 - Resume and JD uploads are shared across all features
 
 ### 🤖 Automated Job Hunter
@@ -39,11 +39,14 @@ All features are seamlessly integrated for a professional, user-friendly experie
 - Generates concise cheat sheets for each topic
 - Option to generate by custom topic
 
-### 🎤 Mock Interview
+### 🎤 Mock Interview (with Proctor Mode)
 - Upload resume and JD, or use shared uploads
-- Get AI-generated interview questions
-- Upload and evaluate your recorded answers (WebM/WAV/MP3)
-- Receive feedback and transcript
+- Only viva (non-coding) questions are presented for voice answers
+- Sequential question flow: one question at a time, with live audio recording and feedback
+- Proctor Mode: webcam photo capture, tab switch detection, and session logging
+- Live timers for each section
+- After all questions, a holistic report is generated (strengths, improvements, resume-JD fit)
+- Download the full report; session resets automatically for a new interview
 
 ---
 
@@ -53,10 +56,21 @@ All features are seamlessly integrated for a professional, user-friendly experie
 - Always-visible, context-aware workflow button on Home
 - All uploads are session-shared for seamless experience
 - HTML tags are stripped from job descriptions for clean display
+- Audio files are ignored by git and stored in `temp_audio/`
+- Proctoring session data is stored in `proctor_session_data/`
+
 
   ![image](https://github.com/user-attachments/assets/096cfe8b-8ef6-4aff-a3f2-005c38131cea)
 
   ![image](https://github.com/user-attachments/assets/87fa11bf-cc5d-4267-b124-9f29eeb8d0a5)
+
+
+## Proctor Mode (Mock Interview)
+- Webcam photo capture every 30 seconds
+- Tab switch/minimize detection and logging
+- Exam auto-termination after excessive tab switches
+- Download all proctoring data as a ZIP file
+- Coding challenge is handled separately from voice (viva) questions
 
 ---
 
@@ -80,8 +94,10 @@ All features are seamlessly integrated for a professional, user-friendly experie
 
 ## Folder Structure
 - `streamlit_app.py` — Main Streamlit app
-- `app/modules/` — Modular feature logic (resume, job hunter, interview, cheat sheet, etc.)
+- `app/modules/` — Modular feature logic (resume, job hunter, interview, cheat sheet, proctoring, etc.)
 - `app/utils/` — Utility functions (job fetching, etc.)
+- `temp_audio/` — Temporary audio files (ignored by git)
+- `proctor_session_data/` — Proctoring session data (ignored by git)
 - `requirements.txt` — Python dependencies
 - `README.md` — Project documentation
 
