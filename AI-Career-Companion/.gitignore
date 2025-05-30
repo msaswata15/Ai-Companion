@@ -119,3 +119,9 @@ node_modules/
 
 # Proctoring session data
 proctor_session_data/
+
+# Audio files
+*.mp3
+*.wav
+*.webm
+/temp_audio/

@@ -468,23 +468,105 @@ elif st.session_state["nav_page"] == "interview":
         with st.spinner("🔍 Generating interview questions..."):
             from app.modules.voice_interview import get_questions_from_resume_and_jd
             question_list = get_questions_from_resume_and_jd(resume_text, jd_text)
-            st.session_state["questions"] = question_list
-            st.success("✅ Questions generated successfully!")
+            # Filter out coding questions (keep only viva questions)
+            coding_keywords = ["code", "program", "implement", "write a function", "algorithm", "python function", "write a method"]
+            def is_coding_question(q):
+                ql = q["question"].lower()
+                return any(kw in ql for kw in coding_keywords)
+            viva_questions = [q for q in question_list if not is_coding_question(q)]
+            st.session_state["questions"] = viva_questions
+            st.session_state["current_question_idx"] = 0
+            st.session_state["interview_complete"] = False
+            # Reset answer state
+            for key in ['recording_complete', 'audio_file_path', 'transcript', 'feedback', 'evaluation_complete']:
+                if key in st.session_state:
+                    del st.session_state[key]
+            st.success(f"✅ {len(viva_questions)} viva questions generated successfully!")
 
-    # Step 3: Proctor Mode and Questions (only after questions are generated)
-    if "questions" in st.session_state:
+    # Step 3: Proctor Mode and Sequential Questions
+    if "questions" in st.session_state and st.session_state["questions"]:
         from app.modules.mock_interview.proctor_mode import proctor_mode_ui
         proctor_mode_ui()
         st.markdown("---")
-        selected = st.selectbox(
-            "📋 Choose a question to answer:",
-            [q["question"] for q in st.session_state["questions"]],
-        )
-        st.session_state["selected_question"] = selected
-        
-        if st.session_state.get("selected_question"):
-            st.subheader("🎯 Selected Question")
-            st.markdown(f"<div class='card'>{st.session_state['selected_question']}</div>", unsafe_allow_html=True)
+        questions = st.session_state["questions"]
+        idx = st.session_state.get("current_question_idx", 0)
+        if idx >= len(questions):
+            st.success("🎉 Interview complete! You have answered all questions.")
+            # --- Generate and display holistic summary and report ---
+            if "interview_report" not in st.session_state or "interview_summary" not in st.session_state:
+                # Aggregate all feedbacks and transcripts
+                all_feedbacks = st.session_state.get("all_feedbacks", [])
+                all_transcripts = st.session_state.get("all_transcripts", [])
+                # Get resume and JD for context
+                resume_text = st.session_state.get("shared_resume_text", "")
+                jd_text = st.session_state.get("shared_jd", "")
+                # Simple analysis: strengths/weaknesses extraction (placeholder logic)
+                strengths = []
+                improvements = []
+                for fb in all_feedbacks:
+                    if "strength" in fb.lower() or "good" in fb.lower() or "well" in fb.lower():
+                        strengths.append(fb)
+                    if "improve" in fb.lower() or "weak" in fb.lower() or "could be better" in fb.lower():
+                        improvements.append(fb)
+                # Holistic summary (placeholder logic)
+                summary = """
+                <div class='card'>
+                <h3>🔎 Overall Interview Summary</h3>
+                <b>Resume-JD Fit:</b> {}
+                <br><b>Overall Strengths:</b> {}
+                <br><b>Key Areas to Improve:</b> {}
+                <br><b>General Advice:</b> {}
+                </div>
+                """.format(
+                    "Strong alignment with job requirements." if resume_text and jd_text and any(s in resume_text for s in jd_text.split()[:5]) else "Some gaps detected between resume and JD.",
+                    ', '.join(strengths) if strengths else 'No major strengths detected.',
+                    ', '.join(improvements) if improvements else 'No major weaknesses detected.',
+                    "Review your answers and feedback above. Consider tailoring your resume more closely to the JD for best results."
+                )
+                st.session_state["interview_summary"] = summary
+                # Compose detailed report
+                report = """
+                <div class='card'>
+                <h3>📝 Mock Interview Report</h3>
+                <b>What Went Well:</b><br>
+                <ul>{}</ul>
+                <b>Areas for Improvement:</b><br>
+                <ul>{}</ul>
+                <b>Other Feedback:</b><br>
+                <ul>{}</ul>
+                </div>
+                """.format(
+                    ''.join(f'<li>{s}</li>' for s in strengths) if strengths else '<li>No major strengths detected.</li>',
+                    ''.join(f'<li>{w}</li>' for w in improvements) if improvements else '<li>No major weaknesses detected.</li>',
+                    ''.join(f'<li>{f}</li>' for f in all_feedbacks if f not in strengths+improvements) or '<li>Great effort! Review your answers above for more details.</li>'
+                )
+                st.session_state["interview_report"] = report
+            st.markdown(st.session_state["interview_summary"], unsafe_allow_html=True)
+            st.markdown(st.session_state["interview_report"], unsafe_allow_html=True)
+            # Optionally, allow download
+            if st.button("⬇️ Download Full Report as TXT"):
+                txt = "Mock Interview Report\n\n"
+                txt += "Overall Interview Summary\n" + (st.session_state["interview_summary"].replace('<div class=\'card\'>','').replace('</div>','').replace('<h3>','').replace('</h3>','').replace('<b>','').replace('</b>','').replace('<br>','\n').replace('<ul>','').replace('</ul>','').replace('<li>','- ').replace('</li>','\n')) + "\n"
+                for i, (q, t, f) in enumerate(zip([q['question'] for q in questions], st.session_state.get('all_transcripts', []), st.session_state.get('all_feedbacks', [])), 1):
+                    txt += f"Q{i}: {q}\nYour Answer: {t}\nFeedback: {f}\n\n"
+                st.download_button("Download Report", txt, file_name="mock_interview_report.txt")
+                # Reset all mock interview session state after download
+                for key in [
+                    "questions", "current_question_idx", "interview_complete", "selected_question",
+                    "recording_complete", "audio_file_path", "transcript", "feedback", "evaluation_complete",
+                    "all_feedbacks", "all_transcripts", "interview_report", "interview_summary"
+                ]:
+                    if key in st.session_state:
+                        del st.session_state[key]
+                if hasattr(st.session_state, 'audio_processor'):
+                    st.session_state.audio_processor.clear_frames()
+                st.success("Mock interview session has been reset. You can start a new interview!")
+
+        else:
+            current_q = questions[idx]["question"]
+            st.session_state["selected_question"] = current_q
+            st.subheader(f"Question {idx+1} of {len(questions)}")
+            st.markdown(f"<div class='card'>{current_q}</div>", unsafe_allow_html=True)
             st.subheader("🎙️ Record Your Answer")
             webrtc_ctx = create_webrtc_recorder()
             if webrtc_ctx.state.playing:
@@ -533,12 +615,30 @@ elif st.session_state["nav_page"] == "interview":
                 st.subheader("📊 Evaluation Feedback:")
                 st.markdown(f"<div class='card'>{st.session_state.get('feedback', '')}</div>", unsafe_allow_html=True)
 
-                if st.button("🔄 Start Over", type="secondary"):
-                    for key in ['recording_complete', 'audio_file_path', 'transcript', 'feedback', 'evaluation_complete']:
-                        if key in st.session_state:
-                            del st.session_state[key]
-                    st.session_state.audio_processor.clear_frames()
-                    st.rerun()
+                col1, col2 = st.columns(2)
+                with col1:
+                    if st.button("🔄 Start Over", type="secondary"):
+                        for key in ['recording_complete', 'audio_file_path', 'transcript', 'feedback', 'evaluation_complete']:
+                            if key in st.session_state:
+                                del st.session_state[key]
+                        st.session_state.audio_processor.clear_frames()
+                        st.rerun()
+                with col2:
+                    if st.button("➡️ Next Question", type="primary"):
+                        # Save feedback and transcript for report
+                        if "all_feedbacks" not in st.session_state:
+                            st.session_state["all_feedbacks"] = []
+                        if "all_transcripts" not in st.session_state:
+                            st.session_state["all_transcripts"] = []
+                        st.session_state["all_feedbacks"].append(st.session_state.get("feedback", ""))
+                        st.session_state["all_transcripts"].append(st.session_state.get("transcript", ""))
+                        st.session_state["current_question_idx"] = idx + 1
+                        # Reset answer state
+                        for key in ['recording_complete', 'audio_file_path', 'transcript', 'feedback', 'evaluation_complete']:
+                            if key in st.session_state:
+                                del st.session_state[key]
+                        st.session_state.audio_processor.clear_frames()
+                        st.rerun()
 
         # Proctor Evaluation (unchanged)
         if (
