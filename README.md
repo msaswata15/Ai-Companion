@@ -58,7 +58,8 @@ All features are seamlessly integrated for a professional, user-friendly experie
 
   ![image](https://github.com/user-attachments/assets/87fa11bf-cc5d-4267-b124-9f29eeb8d0a5)
 
----
+  ![image](https://github.com/user-attachments/assets/1bb572ab-a991-4c45-98c0-7cc8b6d2e379)
+
 
 ## Setup & Installation
 
