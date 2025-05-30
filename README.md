@@ -44,7 +44,7 @@ All features are seamlessly integrated for a professional, user-friendly experie
 - Get AI-generated interview questions
 - Upload and evaluate your recorded answers (WebM/WAV/MP3)
 - Receive feedback and transcript
-
+- Solve coding questions in interview(local compilation) in proctored env
 ---
 
 ## UI/UX Highlights
