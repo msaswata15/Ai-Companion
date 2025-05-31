@@ -107,6 +107,7 @@ def proctor_mode_ui():
             with cols[idx % 6]:
                 st.image(img, caption=ts, width=80)
 
+<<<<<<< HEAD
     # --- Coding Question Section ---
     dsa_questions = [
         ("Python", "Write a Python function to check if a string is a palindrome."),
@@ -196,3 +197,34 @@ def proctor_mode_ui():
                     st.error(f"Test Case {idx}: Error ({err})")
                 else:
                     st.error(f"Test Case {idx}: Failed")
+=======
+    # --- Coding Question Section (Python only) ---
+    questions = [
+        "Write a Python function to check if a string is a palindrome.",
+        "Write a Python function to find the nth Fibonacci number."
+    ]
+    coding_question = random.choice(questions)
+    st.header("💻 Coding Challenge (Python)")
+    st.info(f"**Question:** {coding_question}")
+    # Persist user code
+    default_code = st.session_state.get("proctor_code_input", "")
+    code_input = st.text_area("✍️ Write your Python code here", value=default_code, height=200, key="proctor_code_input")
+    code_output = None
+    code_error = None
+    if st.button("▶️ Run Code", key="proctor_run_code"):
+        import io, contextlib
+        try:
+            # Execute user code and capture stdout
+            f = io.StringIO()
+            with contextlib.redirect_stdout(f):
+                exec(code_input, {})
+            code_output = f.getvalue()
+        except Exception as e:
+            code_error = str(e)
+    if code_output is not None:
+        st.subheader("Output")
+        st.code(code_output)
+    if code_error is not None:
+        st.subheader("Error")
+        st.error(code_error)
+>>>>>>> 817da3f928a9f49abdcd427c309282572cb3a50c
