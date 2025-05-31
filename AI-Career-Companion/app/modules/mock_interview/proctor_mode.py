@@ -187,7 +187,10 @@ def proctor_mode_ui():
     code_input = st.text_area(f"✍️ Write your code here (Python)", value=st.session_state['proctor_code_input'], height=200, key="proctor_code_input")
     code_output = None
     code_error = None
-    test_results = None
+    # Use session state to persist test results
+    if 'proctor_test_results' not in st.session_state:
+        st.session_state['proctor_test_results'] = None
+    test_results = st.session_state['proctor_test_results']
     lang_options = ["Python"]
     selected_lang = st.selectbox("Select Language", lang_options, index=0, key="proctor_lang_select")
     if st.button("▶️ Run Code", key="proctor_run_code"):
@@ -210,7 +213,6 @@ def proctor_mode_ui():
                             test_results.append((idx+1, passed, None))
                         except Exception as e:
                             tb = traceback.format_exc()
-                            # Try to extract the error line from the traceback
                             error_line = None
                             for line in tb.splitlines():
                                 if 'File "<string>",' in line and ', in <module>' in line:
@@ -347,6 +349,10 @@ def proctor_mode_ui():
                     code_error = "Unknown question type."
             except Exception as e:
                 code_error = str(e)
+        # Persist test results in session state
+        st.session_state['proctor_test_results'] = test_results
+    # Always use the persisted test results for display
+    test_results = st.session_state.get('proctor_test_results', None)
     if code_output:
         st.success("Output:")
         st.code(code_output)

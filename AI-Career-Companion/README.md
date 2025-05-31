@@ -7,7 +7,7 @@ AI Career Companion is a modern, all-in-one Streamlit application designed to he
 - Automated job hunting and matching
 - Tailored resume and cover letter generation
 - Cheat sheet creation for technical interviews
-- Voice-based mock interview practice (with proctoring)
+- Voice-based mock interview practice (with Proctoring)
 
 All features are seamlessly integrated for a professional, user-friendly experience.
 
@@ -43,9 +43,19 @@ All features are seamlessly integrated for a professional, user-friendly experie
 
 ### 🎤 Mock Interview (with Proctor Mode)
 - Upload resume and JD, or use shared uploads
-- Only viva (non-coding) questions are presented for voice answers
-- Sequential question flow: one question at a time, with live audio recording and feedback
-- Proctor Mode: webcam photo capture, tab switch detection, and session logging
+- Viva (non-coding) and coding questions are supported
+- **Coding Challenge:**
+  - Only Python coding questions are given (DSA-focused)
+  - One random coding question per session (persisted)
+  - User code and hidden test case results persist after each run
+  - Hidden test cases are checked and detailed error messages (with line numbers) are shown for failures
+  - Robust session state management for code, results, and question
+- **Proctor Mode:**
+  - Webcam photo capture every 30 seconds
+  - Tab switch/minimize detection and logging
+  - Exam auto-termination after excessive tab switches
+  - Download all proctoring data as a ZIP file
+- Sequential question flow: one question at a time, with live audio recording and feedback (for viva)
 - Live timers for each section
 - After all questions, a holistic report is generated (strengths, improvements, resume-JD fit)
 - Download the full report; session resets automatically for a new interview
