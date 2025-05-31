@@ -111,76 +111,88 @@ def proctor_mode_ui():
     dsa_questions = [
         ("Python", "Write a Python function to check if a string is a palindrome."),
         ("Python", "Write a Python function to find the nth Fibonacci number."),
-        ("Java", "Write a Java method to reverse an array of integers."),
-        ("Java", "Write a Java method to check if a number is prime."),
-        ("C", "Write a C function to find the maximum element in an array."),
-        ("C", "Write a C function to compute the factorial of a number using recursion."),
     ]
+    # Hidden test cases for each question
+    hidden_tests = {
+        dsa_questions[0][1]: [  # Palindrome
+            ("racecar", True),
+            ("hello", False),
+            ("Aibohphobia", True),
+            ("", True),
+            ("12321", True),
+        ],
+        dsa_questions[1][1]: [  # Fibonacci
+            (1, 1),
+            (2, 1),
+            (5, 5),
+            (10, 55),
+            (0, 0),
+        ],
+    }
     lang, coding_question = random.choice(dsa_questions)
-    st.header(f"💻 Coding Challenge (Proctor Mode) [{lang}]")
+    st.header(f"💻 Coding Challenge (Proctor Mode) [Python]")
     st.info(f"**Question:** {coding_question}")
-    code_input = st.text_area(f"✍️ Write your code here ({lang})", height=200, key="proctor_code_input")
+    # Use session state to persist code
+    if 'proctor_code_input' not in st.session_state:
+        st.session_state['proctor_code_input'] = ''
+    code_input = st.text_area(f"✍️ Write your code here (Python)", value=st.session_state['proctor_code_input'], height=200, key="proctor_code_input")
     code_output = None
     code_error = None
-    lang_options = ["Python", "Java", "C"]
-    selected_lang = st.selectbox("Select Language", lang_options, index=lang_options.index(lang), key="proctor_lang_select")
+    test_results = None
+    lang_options = ["Python"]
+    selected_lang = st.selectbox("Select Language", lang_options, index=0, key="proctor_lang_select")
     if st.button("▶️ Run Code", key="proctor_run_code"):
         import io
         import contextlib
         user_code = code_input
+        # Prepare to run hidden tests
+        test_results = []
         if selected_lang == "Python":
-            # Simple test harness for Python
-            test_code = """
-try:
-    exec(user_code, globals())
-    print('✅ Code executed (Python).')
-except Exception as e:
-    print('❌ Error:', e)
-"""
-            f = io.StringIO()
-            try:
-                with contextlib.redirect_stdout(f):
-                    exec(user_code + "\n" + test_code, {'user_code': user_code})
-                code_output = f.getvalue()
-            except Exception as e:
-                code_error = str(e)
-        elif selected_lang == "Java":
-            # Save to file and run with javac/java
-            import tempfile
-            import subprocess
-            with tempfile.TemporaryDirectory() as tmpdir:
-                java_file = os.path.join(tmpdir, "Main.java")
-                with open(java_file, "w") as f:
-                    f.write(user_code)
-                try:
-                    compile_proc = subprocess.run(["javac", java_file], capture_output=True, text=True)
-                    if compile_proc.returncode != 0:
-                        code_error = compile_proc.stderr
-                    else:
-                        run_proc = subprocess.run(["java", "-cp", tmpdir, "Main"], capture_output=True, text=True)
-                        code_output = run_proc.stdout + run_proc.stderr
-                except Exception as e:
-                    code_error = str(e)
-        elif selected_lang == "C":
-            # Save to file and run with gcc
-            import tempfile
-            import subprocess
-            with tempfile.TemporaryDirectory() as tmpdir:
-                c_file = os.path.join(tmpdir, "main.c")
-                exe_file = os.path.join(tmpdir, "main.exe")
-                with open(c_file, "w") as f:
-                    f.write(user_code)
-                try:
-                    compile_proc = subprocess.run(["gcc", c_file, "-o", exe_file], capture_output=True, text=True)
-                    if compile_proc.returncode != 0:
-                        code_error = compile_proc.stderr
-                    else:
-                        run_proc = subprocess.run([exe_file], capture_output=True, text=True)
-                        code_output = run_proc.stdout + run_proc.stderr
-                except Exception as e:
-                    code_error = str(e)
+            # Determine function name expected for each question
+            if "palindrome" in coding_question.lower():
+                func_name = "is_palindrome"
+                test_cases = hidden_tests[coding_question]
+                # User must define is_palindrome(s: str) -> bool
+                code_to_exec = user_code + "\nresult = is_palindrome"
+                for idx, (inp, expected) in enumerate(test_cases):
+                    f = io.StringIO()
+                    try:
+                        local_vars = {}
+                        exec(user_code, local_vars)
+                        result = local_vars[func_name](inp)
+                        passed = result == expected
+                        test_results.append((idx+1, passed))
+                    except Exception as e:
+                        test_results.append((idx+1, False, str(e)))
+            elif "fibonacci" in coding_question.lower():
+                func_name = "fibonacci"
+                test_cases = hidden_tests[coding_question]
+                # User must define fibonacci(n: int) -> int
+                for idx, (inp, expected) in enumerate(test_cases):
+                    f = io.StringIO()
+                    try:
+                        local_vars = {}
+                        exec(user_code, local_vars)
+                        result = local_vars[func_name](inp)
+                        passed = result == expected
+                        test_results.append((idx+1, passed))
+                    except Exception as e:
+                        test_results.append((idx+1, False, str(e)))
+            else:
+                code_error = "Unknown question type."
     if code_output:
         st.success("Output:")
         st.code(code_output)
     if code_error:
         st.error(f"Error: {code_error}")
+    if test_results is not None:
+        st.subheader("🕵️ Hidden Test Cases Results")
+        for idx, *result in test_results:
+            if result[0]:
+                st.success(f"Test Case {idx}: Passed")
+            else:
+                err = result[1] if len(result) > 1 else None
+                if err:
+                    st.error(f"Test Case {idx}: Error ({err})")
+                else:
+                    st.error(f"Test Case {idx}: Failed")
