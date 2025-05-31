@@ -107,11 +107,16 @@ def proctor_mode_ui():
             with cols[idx % 6]:
                 st.image(img, caption=ts, width=80)
 
-<<<<<<< HEAD
     # --- Coding Question Section ---
     dsa_questions = [
         ("Python", "Write a Python function to check if a string is a palindrome."),
         ("Python", "Write a Python function to find the nth Fibonacci number."),
+        ("Python", "Write a Python function to reverse a linked list."),
+        ("Python", "Write a Python function to check if two strings are anagrams."),
+        ("Python", "Write a Python function to find the maximum subarray sum (Kadane's algorithm)."),
+        ("Python", "Write a Python function to return the intersection of two lists."),
+        ("Python", "Write a Python function to compute the factorial of a number."),
+        ("Python", "Write a Python function to check if a number is prime."),
     ]
     # Hidden test cases for each question
     hidden_tests = {
@@ -129,8 +134,51 @@ def proctor_mode_ui():
             (10, 55),
             (0, 0),
         ],
+        dsa_questions[2][1]: [  # Reverse Linked List
+            ([1,2,3,4], [4,3,2,1]),
+            ([1], [1]),
+            ([], []),
+            ([5,6], [6,5]),
+        ],
+        dsa_questions[3][1]: [  # Anagrams
+            (("listen", "silent"), True),
+            (("hello", "bello"), False),
+            (("triangle", "integral"), True),
+            (("abc", "cab"), True),
+            (("aabb", "bbaa"), True),
+        ],
+        dsa_questions[4][1]: [  # Max Subarray Sum
+            ([1,2,3,-2,5], 9),
+            ([-1,-2,-3,-4], -1),
+            ([4,-1,2,1], 6),
+            ([5,-2,3,4], 10),
+        ],
+        dsa_questions[5][1]: [  # Intersection of Lists
+            (([1,2,3],[2,3,4]), [2,3]),
+            (([1,1,1],[1]), [1]),
+            (([1,2],[3,4]), []),
+            (([],[1,2]), []),
+        ],
+        dsa_questions[6][1]: [  # Factorial
+            (0, 1),
+            (1, 1),
+            (5, 120),
+            (7, 5040),
+        ],
+        dsa_questions[7][1]: [  # Prime check
+            (2, True),
+            (17, True),
+            (18, False),
+            (1, False),
+            (97, True),
+        ],
     }
-    lang, coding_question = random.choice(dsa_questions)
+    # Only select a new question if not already set in session state
+    if 'proctor_coding_question' not in st.session_state:
+        lang, coding_question = random.choice(dsa_questions)
+        st.session_state['proctor_coding_question'] = coding_question
+    else:
+        coding_question = st.session_state['proctor_coding_question']
     st.header(f"💻 Coding Challenge (Proctor Mode) [Python]")
     st.info(f"**Question:** {coding_question}")
     # Use session state to persist code
@@ -145,42 +193,160 @@ def proctor_mode_ui():
     if st.button("▶️ Run Code", key="proctor_run_code"):
         import io
         import contextlib
+        import traceback
         user_code = code_input
-        # Prepare to run hidden tests
         test_results = []
         if selected_lang == "Python":
-            # Determine function name expected for each question
-            if "palindrome" in coding_question.lower():
-                func_name = "is_palindrome"
-                test_cases = hidden_tests[coding_question]
-                # User must define is_palindrome(s: str) -> bool
-                code_to_exec = user_code + "\nresult = is_palindrome"
-                for idx, (inp, expected) in enumerate(test_cases):
-                    f = io.StringIO()
-                    try:
+            try:
+                if "palindrome" in coding_question.lower():
+                    func_name = "is_palindrome"
+                    test_cases = hidden_tests[coding_question]
+                    for idx, (inp, expected) in enumerate(test_cases):
                         local_vars = {}
-                        exec(user_code, local_vars)
-                        result = local_vars[func_name](inp)
-                        passed = result == expected
-                        test_results.append((idx+1, passed))
-                    except Exception as e:
-                        test_results.append((idx+1, False, str(e)))
-            elif "fibonacci" in coding_question.lower():
-                func_name = "fibonacci"
-                test_cases = hidden_tests[coding_question]
-                # User must define fibonacci(n: int) -> int
-                for idx, (inp, expected) in enumerate(test_cases):
-                    f = io.StringIO()
-                    try:
+                        try:
+                            exec(user_code, local_vars)
+                            result = local_vars[func_name](inp)
+                            passed = result == expected
+                            test_results.append((idx+1, passed, None))
+                        except Exception as e:
+                            tb = traceback.format_exc()
+                            # Try to extract the error line from the traceback
+                            error_line = None
+                            for line in tb.splitlines():
+                                if 'File "<string>",' in line and ', in <module>' in line:
+                                    error_line = line.strip()
+                                    break
+                            test_results.append((idx+1, False, f"{e} {error_line if error_line else ''}"))
+                elif "fibonacci" in coding_question.lower():
+                    func_name = "fibonacci"
+                    test_cases = hidden_tests[coding_question]
+                    for idx, (inp, expected) in enumerate(test_cases):
                         local_vars = {}
-                        exec(user_code, local_vars)
-                        result = local_vars[func_name](inp)
-                        passed = result == expected
-                        test_results.append((idx+1, passed))
-                    except Exception as e:
-                        test_results.append((idx+1, False, str(e)))
-            else:
-                code_error = "Unknown question type."
+                        try:
+                            exec(user_code, local_vars)
+                            result = local_vars[func_name](inp)
+                            passed = result == expected
+                            test_results.append((idx+1, passed, None))
+                        except Exception as e:
+                            tb = traceback.format_exc()
+                            error_line = None
+                            for line in tb.splitlines():
+                                if 'File "<string>",' in line and ', in <module>' in line:
+                                    error_line = line.strip()
+                                    break
+                            test_results.append((idx+1, False, f"{e} {error_line if error_line else ''}"))
+                elif "reverse a linked list" in coding_question.lower():
+                    func_name = "reverse_linked_list"
+                    test_cases = hidden_tests[coding_question]
+                    for idx, (inp, expected) in enumerate(test_cases):
+                        local_vars = {}
+                        try:
+                            exec(user_code, local_vars)
+                            result = local_vars[func_name](inp)
+                            passed = result == expected
+                            test_results.append((idx+1, passed, None))
+                        except Exception as e:
+                            tb = traceback.format_exc()
+                            error_line = None
+                            for line in tb.splitlines():
+                                if 'File "<string>",' in line and ', in <module>' in line:
+                                    error_line = line.strip()
+                                    break
+                            test_results.append((idx+1, False, f"{e} {error_line if error_line else ''}"))
+                elif "anagram" in coding_question.lower():
+                    func_name = "are_anagrams"
+                    test_cases = hidden_tests[coding_question]
+                    for idx, (inp, expected) in enumerate(test_cases):
+                        local_vars = {}
+                        try:
+                            exec(user_code, local_vars)
+                            result = local_vars[func_name](*inp)
+                            passed = result == expected
+                            test_results.append((idx+1, passed, None))
+                        except Exception as e:
+                            tb = traceback.format_exc()
+                            error_line = None
+                            for line in tb.splitlines():
+                                if 'File "<string>",' in line and ', in <module>' in line:
+                                    error_line = line.strip()
+                                    break
+                            test_results.append((idx+1, False, f"{e} {error_line if error_line else ''}"))
+                elif "maximum subarray sum" in coding_question.lower():
+                    func_name = "max_subarray_sum"
+                    test_cases = hidden_tests[coding_question]
+                    for idx, (inp, expected) in enumerate(test_cases):
+                        local_vars = {}
+                        try:
+                            exec(user_code, local_vars)
+                            result = local_vars[func_name](inp)
+                            passed = result == expected
+                            test_results.append((idx+1, passed, None))
+                        except Exception as e:
+                            tb = traceback.format_exc()
+                            error_line = None
+                            for line in tb.splitlines():
+                                if 'File "<string>",' in line and ', in <module>' in line:
+                                    error_line = line.strip()
+                                    break
+                            test_results.append((idx+1, False, f"{e} {error_line if error_line else ''}"))
+                elif "intersection of two lists" in coding_question.lower():
+                    func_name = "list_intersection"
+                    test_cases = hidden_tests[coding_question]
+                    for idx, (inp, expected) in enumerate(test_cases):
+                        local_vars = {}
+                        try:
+                            exec(user_code, local_vars)
+                            result = local_vars[func_name](*inp)
+                            passed = result == expected
+                            test_results.append((idx+1, passed, None))
+                        except Exception as e:
+                            tb = traceback.format_exc()
+                            error_line = None
+                            for line in tb.splitlines():
+                                if 'File "<string>",' in line and ', in <module>' in line:
+                                    error_line = line.strip()
+                                    break
+                            test_results.append((idx+1, False, f"{e} {error_line if error_line else ''}"))
+                elif "factorial" in coding_question.lower():
+                    func_name = "factorial"
+                    test_cases = hidden_tests[coding_question]
+                    for idx, (inp, expected) in enumerate(test_cases):
+                        local_vars = {}
+                        try:
+                            exec(user_code, local_vars)
+                            result = local_vars[func_name](inp)
+                            passed = result == expected
+                            test_results.append((idx+1, passed, None))
+                        except Exception as e:
+                            tb = traceback.format_exc()
+                            error_line = None
+                            for line in tb.splitlines():
+                                if 'File "<string>",' in line and ', in <module>' in line:
+                                    error_line = line.strip()
+                                    break
+                            test_results.append((idx+1, False, f"{e} {error_line if error_line else ''}"))
+                elif "prime" in coding_question.lower():
+                    func_name = "is_prime"
+                    test_cases = hidden_tests[coding_question]
+                    for idx, (inp, expected) in enumerate(test_cases):
+                        local_vars = {}
+                        try:
+                            exec(user_code, local_vars)
+                            result = local_vars[func_name](inp)
+                            passed = result == expected
+                            test_results.append((idx+1, passed, None))
+                        except Exception as e:
+                            tb = traceback.format_exc()
+                            error_line = None
+                            for line in tb.splitlines():
+                                if 'File "<string>",' in line and ', in <module>' in line:
+                                    error_line = line.strip()
+                                    break
+                            test_results.append((idx+1, False, f"{e} {error_line if error_line else ''}"))
+                else:
+                    code_error = "Unknown question type."
+            except Exception as e:
+                code_error = str(e)
     if code_output:
         st.success("Output:")
         st.code(code_output)
@@ -188,43 +354,11 @@ def proctor_mode_ui():
         st.error(f"Error: {code_error}")
     if test_results is not None:
         st.subheader("🕵️ Hidden Test Cases Results")
-        for idx, *result in test_results:
-            if result[0]:
+        for idx, passed, err in test_results:
+            if passed:
                 st.success(f"Test Case {idx}: Passed")
             else:
-                err = result[1] if len(result) > 1 else None
                 if err:
-                    st.error(f"Test Case {idx}: Error ({err})")
+                    st.error(f"Test Case {idx}: Error: {err}")
                 else:
                     st.error(f"Test Case {idx}: Failed")
-=======
-    # --- Coding Question Section (Python only) ---
-    questions = [
-        "Write a Python function to check if a string is a palindrome.",
-        "Write a Python function to find the nth Fibonacci number."
-    ]
-    coding_question = random.choice(questions)
-    st.header("💻 Coding Challenge (Python)")
-    st.info(f"**Question:** {coding_question}")
-    # Persist user code
-    default_code = st.session_state.get("proctor_code_input", "")
-    code_input = st.text_area("✍️ Write your Python code here", value=default_code, height=200, key="proctor_code_input")
-    code_output = None
-    code_error = None
-    if st.button("▶️ Run Code", key="proctor_run_code"):
-        import io, contextlib
-        try:
-            # Execute user code and capture stdout
-            f = io.StringIO()
-            with contextlib.redirect_stdout(f):
-                exec(code_input, {})
-            code_output = f.getvalue()
-        except Exception as e:
-            code_error = str(e)
-    if code_output is not None:
-        st.subheader("Output")
-        st.code(code_output)
-    if code_error is not None:
-        st.subheader("Error")
-        st.error(code_error)
->>>>>>> 817da3f928a9f49abdcd427c309282572cb3a50c
