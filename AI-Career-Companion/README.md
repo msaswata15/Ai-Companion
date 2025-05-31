@@ -1,6 +1,6 @@
 # AI Career Companion
 
-##Deployed Website https://ai-companio.streamlit.app/
+Deployed Website https://ai-companio.streamlit.app/
 
 ## Overview
 AI Career Companion is a modern, all-in-one Streamlit application designed to help job seekers accelerate their job search and application process using AI. The app provides:
@@ -75,6 +75,10 @@ All features are seamlessly integrated for a professional, user-friendly experie
   ![image](https://github.com/user-attachments/assets/096cfe8b-8ef6-4aff-a3f2-005c38131cea)
 
   ![image](https://github.com/user-attachments/assets/87fa11bf-cc5d-4267-b124-9f29eeb8d0a5)
+
+  ![image](https://github.com/user-attachments/assets/4edafc14-af5d-4d4b-80ce-f0a2850f35ec)
+
+  ![image](https://github.com/user-attachments/assets/82f53aca-3594-49ce-83d9-3b03fbf82f8f)
 
 
 ## Proctor Mode (Mock Interview)
