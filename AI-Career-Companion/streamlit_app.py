@@ -464,6 +464,9 @@ elif st.session_state["nav_page"] == "interview":
             st.text_area("Resume Text", resume_text, height=200, label_visibility="collapsed")
 
     # Step 2: Generate Questions
+    with st.expander("⚙️ Interview Settings", expanded=True):
+        num_questions = st.number_input("Select number of interview questions", min_value=1, max_value=20, value=5, step=1)
+
     if st.button("🧠 Generate Questions from Resume + JD", use_container_width=True) and (jd_text or resume_text):
         with st.spinner("🔍 Generating interview questions..."):
             from app.modules.voice_interview import get_questions_from_resume_and_jd
@@ -473,7 +476,9 @@ elif st.session_state["nav_page"] == "interview":
             def is_coding_question(q):
                 ql = q["question"].lower()
                 return any(kw in ql for kw in coding_keywords)
-            viva_questions = [q for q in question_list if not is_coding_question(q)]
+            all_viva_questions = [q for q in question_list if not is_coding_question(q)]
+            # Use the number chosen by the user:
+            viva_questions = all_viva_questions[:num_questions]
             st.session_state["questions"] = viva_questions
             st.session_state["current_question_idx"] = 0
             st.session_state["interview_complete"] = False
@@ -526,7 +531,7 @@ elif st.session_state["nav_page"] == "interview":
                 st.session_state["interview_summary"] = summary
                 # Compose detailed report
                 report = """
-                <div class='card'>
+                <div class='card'>   
                 <h3>📝 Mock Interview Report</h3>
                 <b>What Went Well:</b><br>
                 <ul>{}</ul>
@@ -567,29 +572,34 @@ elif st.session_state["nav_page"] == "interview":
             st.session_state["selected_question"] = current_q
             st.subheader(f"Question {idx+1} of {len(questions)}")
             st.markdown(f"<div class='card'>{current_q}</div>", unsafe_allow_html=True)
-            st.subheader("🎙️ Record Your Answer")
-            webrtc_ctx = create_webrtc_recorder()
-            if webrtc_ctx.state.playing:
-                st.success("🔴 Recording... Speak your answer and click STOP to finish.")
-            elif st.session_state.is_recording and not webrtc_ctx.state.playing:
-                audio_path = process_recorded_audio()
-                if audio_path:
-                    st.session_state.audio_file_path = audio_path
+            for key in ['recording_complete', 'audio_file_path', 'transcript', 'feedback', 'evaluation_complete']:
+                if key not in st.session_state:
+                    st.session_state[key] = None
+            import mimetypes
+            import tempfile
 
-            if st.session_state.recording_complete and st.session_state.audio_file_path:
-                st.markdown("### 🎵 Recorded Audio")
-                st.audio(st.session_state.audio_file_path, format="audio/wav")
+            audio_file = st.audio_input("🎙️ Record your answer")
 
-                if st.button("💡 Evaluate Answer", use_container_width=True):
-                    with st.spinner("🔍 Analyzing your answer..."):
-                        result = generate_feedback_from_audio(
-                            st.session_state.audio_file_path,
-                            st.session_state["selected_question"]
-                        )
+            if audio_file:
+                mime_type = audio_file.type  # e.g., 'audio/webm', 'audio/ogg', etc.
+                ext = mimetypes.guess_extension(mime_type) or ".webm"
+
+                with tempfile.NamedTemporaryFile(delete=False, suffix=ext) as f:
+                    f.write(audio_file.read())
+                    audio_path = f.name
+
+                st.audio(audio_path)
+                from app.modules.voice_interview.record_audio import convert_to_proper_wav
+                audio_path = convert_to_proper_wav(audio_path)
+                if st.button("💡 Evaluate Answer", key="eval_audio_input"):
+                    try:
+                        result = generate_feedback_from_audio(audio_path, st.session_state["selected_question"])
                         st.session_state.transcript = result["transcript"]
                         st.session_state.feedback = result["feedback"]
                         st.session_state.evaluation_complete = True
                         st.rerun()
+                    except Exception as e:
+                        st.error(f"Error: {e}")
 
             # Uploaded Audio Option
             st.subheader("📁 Or Upload Your Answer")

@@ -124,4 +124,5 @@ proctor_session_data/
 *.mp3
 *.wav
 *.webm
-/temp_audio/
+./temp_audio
+/proctor_session_data/

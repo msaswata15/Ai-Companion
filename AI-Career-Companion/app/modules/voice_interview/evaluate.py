@@ -25,6 +25,10 @@ def evaluate_answer(question: str, answer: str) -> dict:
     Improvements:
 
     ...
+        Correct answer:
+
+    ...
+
     """
     model = genai.GenerativeModel('models/gemini-1.5-flash-latest')
     response = model.generate_content(prompt)

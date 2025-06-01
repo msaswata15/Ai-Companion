@@ -40,6 +40,7 @@ def generate_cheat_sheet(topic: str, job_description: str = None) -> str:
     - Pitfalls or misconceptions
     - Tabular breakdown or tips (if applicable)
     - Some interview questions and answers related to this topic
+    - Some references or resources for further reading along with links 
 
     Format it using markdown-style headings and bullet points.
     """
