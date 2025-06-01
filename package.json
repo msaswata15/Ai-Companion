@@ -9,7 +9,6 @@
     "preview": "vite preview"
   },
   "dependencies": {
-    "@fastapi/static-files": "^1.0.0",
     "marked": "^11.1.0"
   },
   "devDependencies": {
