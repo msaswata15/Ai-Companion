@@ -1,0 +1,18 @@
+{
+  "name": "ai-career-companion",
+  "private": true,
+  "version": "1.0.0",
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview"
+  },
+  "dependencies": {
+    "@fastapi/static-files": "^1.0.0",
+    "marked": "^11.1.0"
+  },
+  "devDependencies": {
+    "vite": "^5.0.8"
+  }
+}
