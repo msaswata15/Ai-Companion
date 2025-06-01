@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Career Companion</title>
+    <link rel="stylesheet" href="/static/css/style.css">
+</head>
+<body>
+    <div class="container">
+        <h1>AI Career Companion</h1>
+        
+        <!-- Resume Upload Section -->
+        <section class="card">
+            <h2>Upload Resume</h2>
+            <div class="input-group">
+                <label for="resumeUpload">Choose PDF Resume</label>
+                <input type="file" id="resumeUpload" accept=".pdf">
+            </div>
+            <div id="resumeText" class="results"></div>
+        </section>
+
+        <!-- Job Search Section -->
+        <section class="card">
+            <h2>Search Jobs</h2>
+            <form id="jobSearchForm">
+                <div class="input-group">
+                    <label for="keywords">Keywords</label>
+                    <input type="text" id="keywords" required placeholder="e.g., Data Scientist, Python">
+                </div>
+                <div class="input-group">
+                    <label for="location">Location (optional)</label>
+                    <input type="text" id="location" placeholder="e.g., New York">
+                </div>
+                <button type="submit" class="btn">Search Jobs</button>
+            </form>
+            <div id="jobResults" class="results"></div>
+        </section>
+
+        <!-- Cheat Sheet Section -->
+        <section class="card">
+            <h2>Generate Cheat Sheet</h2>
+            <form id="cheatSheetForm">
+                <div class="input-group">
+                    <label for="topic">Topic</label>
+                    <input type="text" id="topic" required placeholder="e.g., Binary Search Trees">
+                </div>
+                <button type="submit" class="btn">Generate</button>
+            </form>
+            <div id="cheatSheetContent" class="results"></div>
+        </section>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+    <script src="/static/js/app.js"></script>
+</body>
+</html>
