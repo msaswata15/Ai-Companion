@@ -1,0 +1,216 @@
+% Options for packages loaded elsewhere
+\PassOptionsToPackage{unicode}{hyperref}
+\PassOptionsToPackage{hyphens}{url}
+%
+\documentclass[
+]{article}
+\usepackage{amsmath,amssymb}
+\usepackage{lmodern}
+\usepackage{iftex}
+\ifPDFTeX
+  \usepackage[T1]{fontenc}
+  \usepackage[utf8]{inputenc}
+  \usepackage{textcomp} % provide euro and other symbols
+\else % if luatex or xetex
+  \usepackage{unicode-math}
+  \defaultfontfeatures{Scale=MatchLowercase}
+  \defaultfontfeatures[\rmfamily]{Ligatures=TeX,Scale=1}
+\fi
+% Use upquote if available, for straight quotes in verbatim environments
+\IfFileExists{upquote.sty}{\usepackage{upquote}}{}
+\IfFileExists{microtype.sty}{% use microtype if available
+  \usepackage[]{microtype}
+  \UseMicrotypeSet[protrusion]{basicmath} % disable protrusion for tt fonts
+}{}
+\makeatletter
+\@ifundefined{KOMAClassName}{% if non-KOMA class
+  \IfFileExists{parskip.sty}{%
+    \usepackage{parskip}
+  }{% else
+    \setlength{\parindent}{0pt}
+    \setlength{\parskip}{6pt plus 2pt minus 1pt}}
+}{% if KOMA class
+  \KOMAoptions{parskip=half}}
+\makeatother
+\usepackage{xcolor}
+\setlength{\emergencystretch}{3em} % prevent overfull lines
+\providecommand{\tightlist}{%
+  \setlength{\itemsep}{0pt}\setlength{\parskip}{0pt}}
+\setcounter{secnumdepth}{-\maxdimen} % remove section numbering
+\ifLuaTeX
+  \usepackage{selnolig}  % disable illegal ligatures
+\fi
+\IfFileExists{bookmark.sty}{\usepackage{bookmark}}{\usepackage{hyperref}}
+\IfFileExists{xurl.sty}{\usepackage{xurl}}{} % add URL line breaks if available
+\urlstyle{same} % disable monospaced font for URLs
+\hypersetup{
+  pdftitle={VIKAS GUPTA},
+  hidelinks,
+  pdfcreator={LaTeX via pandoc}}
+
+\title{VIKAS GUPTA}
+\author{}
+\date{}
+
+\begin{document}
+\maketitle
+
+\begin{quote}
+\textbf{Senior Machine Learning Engineer}
+
+New York, NY I (123) 456-7890 I
+\href{mailto:Vijgts@techedtalks.com}{\nolinkurl{Vijgts@techedtalks.com}}
+\end{quote}
+
+\hypertarget{professional-summary}{%
+\section{PROFESSIONAL SUMMARY}\label{professional-summary}}
+
+\begin{quote}
+Results-driven Data Scientist with 5+ years of experience solving
+business challenges using machine learning, statistical analysis, and
+data-driven strategies. Skilled in building predictive models,
+recommendation systems, and NLP tools. Successfully improved customer
+engagement, reduced costs, and streamlined decision-making for
+companies. Strong background in deploying scalable solutions on AWS/GCP.
+\end{quote}
+
+\hypertarget{core-skills}{%
+\section{CORE SKILLS}\label{core-skills}}
+
+\begin{itemize}
+\item
+  \begin{quote}
+  \textbf{Programming:} Python, R, SQL, TensorFlow, PyTorch
+  \end{quote}
+\item
+  \begin{quote}
+  \textbf{Data Science:} Regression/Classification, Clustering, NLP,
+  Time Series, A/B Testing
+  \end{quote}
+\item
+  \begin{quote}
+  \textbf{Tools:} Tableau, Power BI, Git, Docker, Airflow, AWS (S3,
+  SageMaker), GCP (BigQuery)
+  \end{quote}
+\item
+  \begin{quote}
+  \textbf{Deployment:} Flask, FastAPI, Streamlit, Heroku
+  \end{quote}
+\end{itemize}
+
+\hypertarget{professional-experience}{%
+\section{PROFESSIONAL EXPERIENCE}\label{professional-experience}}
+
+\begin{quote}
+\textbf{Data Scientist} I AppITron Solutions, \textbf{New York, NY} Jun
+2020 - Present
+\end{quote}
+
+\begin{itemize}
+\item
+  Built a customer chum prediction model (XGBoost) with 85\% accuracy,
+  improving retention by 28\%.
+\item
+  Created a real-time Tableau dashboard to track marketing campaigns,
+  cutting decision time by 40\%.
+\item
+  Designed a recommendation engine using collaborative filtering,
+  boosting user engagement by 25\%.
+\item
+  Automated NLP pipelines to analyze 1OK+ customer reviews for sentiment
+  and trends.
+\item
+  Deployed models to production using Flask APis and Docker,
+  collaborating with engineering teams.
+\end{itemize}
+
+\begin{quote}
+\textbf{Data Analyst} I Tata Consultancy Services (TCS), \textbf{Mumbai,
+India} May 2017 - May 2020
+\end{quote}
+
+\begin{itemize}
+\item
+  Automated data pipelines, reducing manual reporting efforts by 60\%
+  for banking clients.
+\item
+  Conducted A/B tests to optimize marketing strategies, increasing
+  conversions by 15\%.
+\item
+  Developed SQL queries and Power BI dashboards to track KPis for
+  financial datasets (IM+ rows).
+\end{itemize}
+
+\hypertarget{education}{%
+\section{EDUCATION}\label{education}}
+
+\hypertarget{bachelor-of-technology-computer-science}{%
+\subsection{Bachelor of Technology (Computer
+Science)}\label{bachelor-of-technology-computer-science}}
+
+\begin{quote}
+Indian Institute of Technology (IIT)
+\end{quote}
+
+\hypertarget{certification}{%
+\section{CERTIFICATION}\label{certification}}
+
+\begin{itemize}
+\item
+  AWS Certified Machine Leaming
+\item
+  Google Professional Data Engineer
+\item
+  IBM Data Science (Coursera) I Deep Leaming Specialization
+\end{itemize}
+
+\hypertarget{projects}{%
+\section{PROJECTS}\label{projects}}
+
+\begin{quote}
+2011-2015
+
+2023
+
+2022
+\end{quote}
+
+\hypertarget{movie-recommender-system}{%
+\subsection{Movie Recommender System}\label{movie-recommender-system}}
+
+\begin{itemize}
+\item
+  Built a Netflix-style recommender using collaborative filtering
+  (Python, Scikit-leam, Flask).
+\end{itemize}
+
+\hypertarget{real-time-twitter-sentiment-analyzer}{%
+\subsection{Real-Time Twitter Sentiment
+Analyzer}\label{real-time-twitter-sentiment-analyzer}}
+
+\begin{itemize}
+\item
+  Deployed an NLP model on AWS Lambda to classify live tweets (TextBlob,
+  Flask).
+\end{itemize}
+
+\hypertarget{customer-churn-prediction}{%
+\subsection{Customer Churn Prediction}\label{customer-churn-prediction}}
+
+\begin{itemize}
+\item
+  XGBoost model integrated into a Streamlit dashboard for telecom
+  clients.
+\end{itemize}
+
+\hypertarget{awards}{%
+\section{AWARDS}\label{awards}}
+
+\begin{itemize}
+\item
+  Winner, DataHack 2022 (Analytics Vidhya)
+\item
+  Top 5\% Kaggle Contributor (2023 Bronze Medal, NLP Track)
+\end{itemize}
+
+\end{document}
