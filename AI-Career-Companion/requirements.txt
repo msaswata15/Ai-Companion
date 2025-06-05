@@ -16,3 +16,4 @@ pydantic-settings
 requests
 streamlit-javascript
 ffmpeg-python
+pydub

@@ -3,7 +3,7 @@ from app.utils import genai
 def extract_interview_topics(text: str) -> list[str]:
     """Extract key technical interview topics from resume + JD text."""
     prompt = f"""
-    Given the following resume and job description text, extract the 5 to 7 most relevant technical topics or concepts that a candidate should be prepared to answer in an interview. Focus on data structures, algorithms, AI/ML tools, libraries, platforms, and key skills.
+    Given the following resume and job description text, extract the 10 most relevant technical topics or concepts that a candidate should be prepared to answer in an interview. Focus on data structures, algorithms, AI/ML tools, libraries, platforms, and key skills.
 
     Text:
     {text}
